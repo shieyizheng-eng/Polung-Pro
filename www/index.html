@@ -1,0 +1,80 @@
+html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>破浪專精 - 戰術射擊指揮系統</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: #121619; color: #e0e6ed; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+    .top-app-bar { display: flex; background-color: #1c262f; border-bottom: 2px solid #00a8ff; z-index: 1000; flex-shrink: 0; align-items: center; }
+    .top-tab-btn { flex: 1; padding: 12px 6px; font-size: 0.85rem; font-weight: bold; background: transparent; color: #8395a7; border: none; }
+    .top-tab-btn.active { background: #00a8ff; color: #ffffff; }
+    .pdf-export-btn { background-color: #e1b12c; color: #121619; font-weight: bold; font-size: 0.82rem; border: none; padding: 8px 12px; margin-right: 8px; border-radius: 4px; }
+    .app-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar { background-color: #1e242b; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .tab-header { display: flex; background-color: #28313e; border-radius: 6px; padding: 3px; gap: 4px; flex-shrink: 0; }
+    .tab-btn { flex: 1; padding: 8px 4px; border: none; background-color: transparent; color: #8395a7; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
+    .tab-btn.active { background-color: #00a8ff; color: #fff; }
+    .canvas-container { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #0a0d0f; }
+    canvas { background-color: #172026; border-radius: 50%; max-width: 90vw; max-height: 90vw; }
+    .input-group { background-color: #28313e; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
+    .section-title { font-size: 0.82rem; font-weight: bold; color: #00a8ff; border-left: 3px solid #00a8ff; padding-left: 6px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+  <div class="top-app-bar">
+    <button class="top-tab-btn active" onclick="switchMainTab('sidebar')">數據計算</button>
+    <button class="top-tab-btn" onclick="switchMainTab('canvas')">射擊圖板</button>
+    <button class="pdf-export-btn" onclick="generatePoLangPDF()">📄 破浪PDF</button>
+  </div>
+
+  <div class="app-container">
+    <div class="sidebar" id="sidebarContainer">
+      <div class="tab-header">
+        <button class="tab-btn active" id="tab1Btn" onclick="switchTab('tab1')">1.諸元圖解</button>
+        <button class="tab-btn" id="tabFanBtn" onclick="switchTab('tabFan')">2.扇形圖</button>
+        <button class="tab-btn" id="tab2Btn" onclick="switchTab('tab2')">3.落彈修正</button>
+        <button class="tab-btn" id="tab4Btn" onclick="switchTab('tab4')">4.效力射</button>
+      </div>
+
+      <!-- 諸元圖解內容 (簡化範例) -->
+      <div id="tab1Content">
+        <div class="input-group">
+          <div class="section-title">觀測員 (OP) MGRS 設定</div>
+          <input type="text" id="opE8" value="4999" style="width:80px;"> / <input type="text" id="opN8" value="1962" style="width:80px;">
+        </div>
+        <button style="width:100%; padding:10px; background:#4cd137; border:none; font-weight:bold;">執行計算</button>
+      </div>
+    </div>
+
+    <div class="canvas-container" id="canvasMainContainer" style="display:none;">
+      <canvas id="boardCanvas" width="760" height="760"></canvas>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      alert("切換至 " + tab);
+      // 這裡將會放入我們先前開發的各分頁顯示邏輯 [1]
+    }
+    function switchMainTab(view) {
+      document.getElementById('sidebarContainer').style.display = (view === 'sidebar' ? 'flex' : 'none');
+      document.getElementById('canvasMainContainer').style.display = (view === 'canvas' ? 'flex' : 'none');
+    }
+    function generatePoLangPDF() {
+      alert("正在產製破浪 PDF 報告...");
+      // 這裡將會放入我們先前開發的 PDF 導出引擎 [1, 3]
+    }
+  </script>
+</body>
+</html>
