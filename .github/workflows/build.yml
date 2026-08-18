@@ -22,28 +22,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Prepare Web Assets
+      - name: Prepare Web Assets & Sync
         run: |
           mkdir -p www
-          cp index.html www/index.html
-
-      - name: Install Dependencies
-        run: |
+          cp index.html www/index.html || true
           npm install
-          npm install -g @capacitor/cli
-
-      - name: Sync Capacitor
-        run: |
-          npx cap copy android
           npx cap sync android
 
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
