@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build APK & Live Update Bundle
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -24,15 +26,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Capacitor CLI & Dependencies
-        run: |
-          npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-
-      - name: Prepare Web Assets & Sync
+      - name: Prepare Web Assets & Zip Bundle
         run: |
           mkdir -p www
           cp index.html www/index.html || true
+          cd www && zip -r ../dist.zip ./* && cd ..
+
+      - name: Install Dependencies & Sync
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capgo/capacitor-updater
           npx @capacitor/cli sync android
 
       - name: Build Android APK
@@ -46,3 +49,14 @@ jobs:
         with:
           name: Polung-Pro-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Create GitHub Release for Live Update
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist.zip
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
