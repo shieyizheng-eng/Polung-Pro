@@ -40,7 +40,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifacts-more@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Polung-Pro-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
