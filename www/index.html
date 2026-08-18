@@ -1,80 +1,1296 @@
-html
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>破浪專精 - 戰術射擊指揮系統</title>
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>任務發佈板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background-color: #121619; color: #e0e6ed; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --primary: #3b82f6;
+      --primary-light: #eff6ff;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --danger: #ef4444;
+      --border-radius: 16px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    .top-app-bar { display: flex; background-color: #1c262f; border-bottom: 2px solid #00a8ff; z-index: 1000; flex-shrink: 0; align-items: center; }
-    .top-tab-btn { flex: 1; padding: 12px 6px; font-size: 0.85rem; font-weight: bold; background: transparent; color: #8395a7; border: none; }
-    .top-tab-btn.active { background: #00a8ff; color: #ffffff; }
-    .pdf-export-btn { background-color: #e1b12c; color: #121619; font-weight: bold; font-size: 0.82rem; border: none; padding: 8px 12px; margin-right: 8px; border-radius: 4px; }
-    .app-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .sidebar { background-color: #1e242b; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-    .tab-header { display: flex; background-color: #28313e; border-radius: 6px; padding: 3px; gap: 4px; flex-shrink: 0; }
-    .tab-btn { flex: 1; padding: 8px 4px; border: none; background-color: transparent; color: #8395a7; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
-    .tab-btn.active { background-color: #00a8ff; color: #fff; }
-    .canvas-container { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #0a0d0f; }
-    canvas { background-color: #172026; border-radius: 50%; max-width: 90vw; max-height: 90vw; }
-    .input-group { background-color: #28313e; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
-    .section-title { font-size: 0.82rem; font-weight: bold; color: #00a8ff; border-left: 3px solid #00a8ff; padding-left: 6px; margin-bottom: 6px; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #e2e8f0; color: var(--text-main); font-family: var(--font-family); display: flex; justify-content: center; min-height: 100vh; }
+
+    .app-container {
+      width: 100%; max-width: 480px; background-color: var(--bg-color);
+      display: flex; flex-direction: column; height: 100vh; position: relative;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.15); overflow: hidden;
+    }
+
+    .topbar { background: #ffffff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 20; }
+    .topbar h1 { font-size: 18px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .date-badge { font-size: 12px; font-weight: 500; background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; }
+
+    main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; }
+    .panel { display: none; animation: fadeIn 0.25s ease-in-out; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .hint { font-size: 12px; color: var(--text-sub); margin-top: 6px; margin-bottom: 12px; }
+
+    /* 行事曆 */
+    .cal-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-label { font-size: 15px; font-weight: 700; }
+    .cal-nav-btns { display: flex; gap: 6px; }
+    .btn-icon { width: 32px; height: 32px; border-radius: 50%; border: none; background: #f1f5f9; color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; }
+    .btn-today { background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 12px; border: none; cursor: pointer; }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-day { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #f8fafc; border: 2px solid transparent; cursor: pointer; }
+    .cal-day.has-tasks { border-color: #22c55e; background: #f0fdf4; color: #166534; }
+    .cal-day.today { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+    .cal-day.other-month { opacity: 0.3; cursor: default; }
+
+    /* 任務卡片 */
+    .task-list { display: flex; flex-direction: column; gap: 12px; }
+    .task-card { background: #ffffff; border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); display: flex; flex-direction: column; gap: 8px; }
+    .task-header { display: flex; align-items: center; justify-content: space-between; }
+    .task-title { font-size: 15px; font-weight: 700; }
+    .task-desc { font-size: 12px; color: var(--text-sub); white-space: pre-line; }
+
+    .type-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #ffffff; display: inline-block; }
+
+    .task-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed #e2e8f0; }
+    .select-sm { padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; background: #f8fafc; }
+
+    /* 表單與按鈕 */
+    .form-group { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+    .input-field { margin-bottom: 12px; }
+    .input-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+    .input-field input, .input-field textarea, .input-field select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-family: inherit; background: #f8fafc; }
+
+    .duration-picker { display: flex; align-items: center; gap: 10px; }
+    .btn-step { width: 36px; height: 36px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .duration-display { font-size: 14px; font-weight: 700; color: var(--primary); min-width: 80px; text-align: center; }
+
+    .btn { width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--primary); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-ghost { background: #f1f5f9; color: var(--text-main); }
+    .btn-danger { background: #fee2e2; color: var(--danger); padding: 6px 10px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; }
+    .btn-reset { background: #fee2e2; color: var(--danger); font-size: 12px; padding: 4px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; }
+
+    .assignee-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip-btn { padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 600; background: #f1f5f9; color: var(--text-sub); border: 1px solid #cbd5e1; cursor: pointer; }
+    .chip-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+    .dept-group { margin-bottom: 16px; }
+    .dept-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px; border-bottom: 2px solid var(--primary-light); padding-bottom: 4px; }
+    .member-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .member-item { background: var(--card-bg); padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); }
+
+    .guard-type-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .toggle-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; }
+    .toggle-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+    .guard-slots { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .guard-slot-card { background: var(--card-bg); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); }
+
+    .color-picker-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 8px; max-height: 120px; overflow-y: auto; padding: 4px; }
+    .color-box { aspect-ratio: 1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+    .color-box.selected { border-color: #000000; scale: 1.1; }
+
+    /* 戰力比甘特圖 (一個月可滑動) */
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .metric-card { background: #ffffff; padding: 12px 8px; border-radius: 12px; text-align: center; box-shadow: var(--shadow-sm); }
+    .metric-val { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; }
+    .metric-lbl { font-size: 10px; color: var(--text-sub); }
+
+    .gantt-container { overflow-x: auto; background: #ffffff; border-radius: 16px; padding: 12px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+    .gantt-table { width: 100%; border-collapse: collapse; min-width: 1100px; font-size: 11px; }
+    .gantt-table th, .gantt-table td { padding: 6px 3px; border: 1px solid #e2e8f0; text-align: center; }
+    .gantt-table th { background: #f8fafc; font-weight: 700; min-width: 32px; }
+    .gantt-table th.today-col { background: var(--primary-light); color: var(--primary); }
+    
+    .badge-fan { background: #3b82f6; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
+    .badge-dao { background: #f59e0b; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
+
+    .cov-good { background: #dcfce7; color: #15803d; font-weight:700; }
+    .cov-warn { background: #fef3c7; color: #b45309; font-weight:700; }
+    .cov-danger { background: #fee2e2; color: #b91c1c; font-weight:700; }
+
+    /* 3 個月縮圖月曆 */
+    .quarter-grid { display: flex; flex-direction: column; gap: 16px; }
+    .mini-cal { background: #ffffff; border-radius: 12px; padding: 12px; box-shadow: var(--shadow-sm); }
+    .mini-cal-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-align: center; }
+    .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 10px; }
+    .mini-day { aspect-ratio: 1; border-radius: 6px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .mini-day.has-leave { background: #fef3c7; color: #b45309; font-weight: 700; }
+
+    /* 底欄 Navigation (7 分頁滑動) */
+    .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; overflow-x: auto; padding: 8px 0 12px; z-index: 30; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: #94a3b8; font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; min-width: 68px; flex-shrink: 0; }
+    .nav-item i { font-size: 18px; }
+    .nav-item.active { color: var(--primary); font-weight: 700; }
+
+    .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85); color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 100; display: none; }
   </style>
 </head>
 <body>
 
-  <div class="top-app-bar">
-    <button class="top-tab-btn active" onclick="switchMainTab('sidebar')">數據計算</button>
-    <button class="top-tab-btn" onclick="switchMainTab('canvas')">射擊圖板</button>
-    <button class="pdf-export-btn" onclick="generatePoLangPDF()">📄 破浪PDF</button>
-  </div>
-
   <div class="app-container">
-    <div class="sidebar" id="sidebarContainer">
-      <div class="tab-header">
-        <button class="tab-btn active" id="tab1Btn" onclick="switchTab('tab1')">1.諸元圖解</button>
-        <button class="tab-btn" id="tabFanBtn" onclick="switchTab('tabFan')">2.扇形圖</button>
-        <button class="tab-btn" id="tab2Btn" onclick="switchTab('tab2')">3.落彈修正</button>
-        <button class="tab-btn" id="tab4Btn" onclick="switchTab('tab4')">4.效力射</button>
-      </div>
+    <header class="topbar">
+      <h1><i class="fa-solid fa-list-check"></i> 任務發佈板</h1>
+      <div id="dateBadge" class="date-badge">2026/08/16</div>
+    </header>
 
-      <!-- 諸元圖解內容 (簡化範例) -->
-      <div id="tab1Content">
-        <div class="input-group">
-          <div class="section-title">觀測員 (OP) MGRS 設定</div>
-          <input type="text" id="opE8" value="4999" style="width:80px;"> / <input type="text" id="opN8" value="1962" style="width:80px;">
+    <div id="toast" class="toast">訊息提示</div>
+
+    <main>
+      <!-- Panel 1: 日期行事曆 -->
+      <section id="tab-date" class="panel active">
+        <div class="cal-card">
+          <div class="cal-head">
+            <span id="calLabel" class="cal-label"></span>
+            <div class="cal-nav-btns">
+              <button id="prevMonth" class="btn-icon"><i class="fa-solid fa-chevron-left"></i></button>
+              <button id="todayBtn" class="btn-today">今天</button>
+              <button id="nextMonth" class="btn-icon"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          </div>
+          <div id="calGrid" class="cal-grid"></div>
         </div>
-        <button style="width:100%; padding:10px; background:#4cd137; border:none; font-weight:bold;">執行計算</button>
-      </div>
-    </div>
 
-    <div class="canvas-container" id="canvasMainContainer" style="display:none;">
-      <canvas id="boardCanvas" width="760" height="760"></canvas>
-    </div>
+        <h2>
+          <span>當日任務與衛哨表</span>
+          <button class="btn-reset" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> 重置歸零</button>
+        </h2>
+        <div id="dayTaskList" class="task-list"></div>
+      </section>
+
+      <!-- Panel 2: 成員管理 -->
+      <section id="tab-members" class="panel">
+        <h2>新增成員</h2>
+        <div class="form-group">
+          <div class="input-field"><label>部門</label><input id="dept" type="text" placeholder="例如：工程部" /></div>
+          <div class="input-field"><label>職稱</label><input id="role" type="text" placeholder="例如：工程師" /></div>
+          <div class="input-field"><label>姓名</label><input id="name" type="text" placeholder="例如：王小明" /></div>
+          <button id="addMemberBtn" class="btn"><i class="fa-solid fa-user-plus"></i> 加入成員</button>
+        </div>
+
+        <h2>現有成員（依部門排列）</h2>
+        <div id="deptMemberList"></div>
+      </section>
+
+      <!-- Panel 3: 衛哨排班 -->
+      <section id="tab-guard" class="panel">
+        <h2>衛哨排班</h2>
+        <div class="form-group">
+          <div class="input-field"><label>執勤日期</label><input id="guardDate" type="date" /></div>
+        </div>
+
+        <div class="guard-type-toggle">
+          <button id="modeGuardBtn" class="toggle-btn active">衛哨 (22:00-次日22:00)</button>
+          <button id="modeSafeBtn" class="toggle-btn">安全 (夜間+日間)</button>
+        </div>
+
+        <h2>班次人員選派區</h2>
+        <div id="guardSlots" class="guard-slots"></div>
+
+        <button id="publishGuardTaskBtn" class="btn" style="background: #f97316; margin-bottom:20px;">
+          <i class="fa-solid fa-shield-halved"></i> 發佈為衛哨表並同步至日誌
+        </button>
+
+        <h2>已發佈衛哨表內容</h2>
+        <div id="publishedGuardList" class="task-list"></div>
+      </section>
+
+      <!-- Panel 4: 任務發佈 -->
+      <section id="tab-tasks" class="panel">
+        <div class="cal-card">
+          <div class="cal-head">
+            <span id="taskCalLabel" class="cal-label"></span>
+            <div class="cal-nav-btns">
+              <button id="taskPrevMonth" class="btn-icon"><i class="fa-solid fa-chevron-left"></i></button>
+              <button id="taskNextMonth" class="btn-icon"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          </div>
+          <div id="taskCalGrid" class="cal-grid"></div>
+        </div>
+
+        <h2>發佈新任務</h2>
+        <div class="form-group">
+          <div class="input-field"><label>任務名稱</label><input id="taskTitle" type="text" placeholder="例如：設備巡檢" /></div>
+          <div class="input-field"><label>詳細說明</label><textarea id="taskDesc" rows="2" placeholder="詳細內容..."></textarea></div>
+
+          <div class="input-field">
+            <label>預計使用時間</label>
+            <div class="duration-picker">
+              <button type="button" class="btn-step" id="decDuration">-</button>
+              <span id="durationDisplay" class="duration-display">15 分鐘</span>
+              <button type="button" class="btn-step" id="incDuration">+</button>
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label>任務類型</label>
+            <select id="taskCatSelect"></select>
+          </div>
+          <button id="publishTaskBtn" class="btn"><i class="fa-solid fa-paper-plane"></i> 發佈任務</button>
+        </div>
+
+        <h2>自訂任務類型與配色</h2>
+        <div class="form-group">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <input id="newCatName" type="text" placeholder="輸入新類型名稱" style="flex:1; padding:8px; border-radius:8px; border:1px solid #cbd5e1;" />
+            <button id="addCatBtn" class="btn" style="width:80px; padding:8px;">新增</button>
+          </div>
+          <label style="font-size:12px; font-weight:700;">選擇配色：</label>
+          <div id="colorPickerGrid" class="color-picker-grid"></div>
+          <div id="catManageList" style="margin-top:8px;"></div>
+        </div>
+
+        <h2>選定日期已發佈任務</h2>
+        <div id="publishedTaskList" class="task-list"></div>
+      </section>
+
+      <!-- Panel 5: 日誌與篩選區間 -->
+      <section id="tab-log" class="panel">
+        <h2>任務日誌檢視</h2>
+        <div class="form-group">
+          <div style="display:flex; gap:8px;">
+            <div class="input-field" style="flex:1;"><label>開始日期</label><input id="logStart" type="date" /></div>
+            <div class="input-field" style="flex:1;"><label>結束日期</label><input id="logEnd" type="date" /></div>
+          </div>
+        </div>
+
+        <div id="logTaskList" class="task-list"></div>
+
+        <h2 style="margin-top:20px;">匯出檔案</h2>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px;">
+          <button class="btn btn-ghost" onclick="showToast('正在導出 PDF...')">PDF</button>
+          <button class="btn btn-ghost" onclick="showToast('正在導出 Google Doc...')">Google Doc</button>
+          <button class="btn btn-ghost" onclick="showToast('正在導出 JPG...')">JPG</button>
+        </div>
+      </section>
+
+      <!-- Panel 6: 戰力比（甘特圖一個月） -->
+      <section id="tab-coverage" class="panel">
+        <h2>戰力比監控與排假管理</h2>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-lbl">平均戰力比</div>
+            <div class="metric-val" id="covRateVal">100%</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-lbl">返台總人次</div>
+            <div class="metric-val" style="color:var(--primary);" id="fanCountVal">0 人</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-lbl">島休總人次</div>
+            <div class="metric-val" style="color:var(--accent-amber);" id="daoCountVal">0 人</div>
+          </div>
+        </div>
+
+        <!-- 1 個月長度甘特圖 (前10日加後20日，共30日) -->
+        <div class="gantt-container">
+          <div style="font-size:12px; font-weight:700; margin-bottom:8px;">月度戰力甘特圖 (前10日至後20日)</div>
+          <table class="gantt-table">
+            <thead>
+              <tr id="ganttHeaderRow">
+                <th>成員</th>
+              </tr>
+            </thead>
+            <tbody id="ganttBody"></tbody>
+            <tfoot>
+              <tr id="ganttCoverageFooter">
+                <th>戰力比</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- 區塊 1：新增返台紀錄 -->
+        <h2>新增返台紀錄 (返)</h2>
+        <div class="form-group">
+          <div style="display:flex; gap:8px;">
+            <div class="input-field" style="flex:1;"><label>返台開始日期</label><input id="fanStart" type="date" /></div>
+            <div class="input-field" style="flex:1;"><label>返台結束日期</label><input id="fanEnd" type="date" /></div>
+          </div>
+          <div class="input-field">
+            <label>選擇返台成員（可點選多位批次處理）：</label>
+            <div id="fanMemberChips" class="assignee-chips"></div>
+          </div>
+          <button id="addFanBtn" class="btn"><i class="fa-solid fa-plane-departure"></i> 批次新增返台紀錄</button>
+        </div>
+
+        <!-- 區塊 2：新增島休 -->
+        <h2>新增島休 (島)</h2>
+        <div class="form-group">
+          <div class="input-field">
+            <label>島休日期</label>
+            <input id="daoSingleDate" type="date" />
+          </div>
+          <div class="input-field">
+            <label>選擇當日島休成員（點選多位批次新增）：</label>
+            <div id="daoMemberChips" class="assignee-chips"></div>
+          </div>
+          <button id="addDaoBtn" class="btn" style="background:var(--accent-amber);"><i class="fa-solid fa-umbrella-beach"></i> 批次新增島休</button>
+        </div>
+
+        <h2>已登錄休假清單</h2>
+        <div id="leaveRecordsList" class="task-list"></div>
+      </section>
+
+      <!-- Panel 7: 連續 3 個月縮圖月曆 -->
+      <section id="tab-quarterly" class="panel">
+        <h2>季度休假縮圖月曆 (2026 Q3)</h2>
+        <p class="hint">預覽 7月、8月、9月成員排休狀況。</p>
+
+        <div id="quarterGrid" class="quarter-grid"></div>
+
+        <h2 style="margin-top:20px;">成員季度休假額度統計</h2>
+        <div class="form-group">
+          <table class="gantt-table" style="width:100%; min-width:auto;">
+            <thead>
+              <tr>
+                <th>部門/姓名</th>
+                <th>返台次數</th>
+                <th>島休天數</th>
+              </tr>
+            </thead>
+            <tbody id="leaveQuotaBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底欄 Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="date"><i class="fa-solid fa-calendar-days"></i><span>行事曆</span></button>
+      <button class="nav-item" data-tab="members"><i class="fa-solid fa-users"></i><span>成員</span></button>
+      <button class="nav-item" data-tab="guard"><i class="fa-solid fa-shield-cat"></i><span>衛哨</span></button>
+      <button class="nav-item" data-tab="tasks"><i class="fa-solid fa-plus-circle"></i><span>發佈</span></button>
+      <button class="nav-item" data-tab="coverage"><i class="fa-solid fa-chart-line"></i><span>戰力比</span></button>
+      <button class="nav-item" data-tab="quarterly"><i class="fa-solid fa-calendar-week"></i><span>季度</span></button>
+      <button class="nav-item" data-tab="log"><i class="fa-solid fa-book"></i><span>日誌</span></button>
+    </nav>
   </div>
 
   <script>
-    function switchTab(tab) {
-      alert("切換至 " + tab);
-      // 這裡將會放入我們先前開發的各分頁顯示邏輯 [1]
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+      }
     }
-    function switchMainTab(view) {
-      document.getElementById('sidebarContainer').style.display = (view === 'sidebar' ? 'flex' : 'none');
-      document.getElementById('canvasMainContainer').style.display = (view === 'canvas' ? 'flex' : 'none');
-    }
-    function generatePoLangPDF() {
-      alert("正在產製破浪 PDF 報告...");
-      // 這裡將會放入我們先前開發的 PDF 導出引擎 [1, 3]
-    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentDate = new Date(2026, 7, 16);
+      let selectedDateStr = '2026-08-16';
+
+      let members = JSON.parse(localStorage.getItem('polung_members')) || [];
+      let tasks = JSON.parse(localStorage.getItem('polung_tasks')) || [];
+      let leaveRecords = JSON.parse(localStorage.getItem('polung_leaves')) || [];
+      let guardAssignments = JSON.parse(localStorage.getItem('polung_guards')) || {};
+
+      let selectedFanMembers = [];
+      let selectedDaoMembers = [];
+
+      let guardMode = 'guard';
+      let estimatedDuration = 15;
+
+      let customCategories = [
+        { id: 'cat-1', name: '例行公事', color: '#22c55e' },
+        { id: 'cat-2', name: '緊急任務', color: '#ef4444' },
+        { id: 'cat-3', name: '維護作業', color: '#3b82f6' }
+      ];
+      let selectedColor = '#22c55e';
+
+      const paletteColors = [];
+      for (let i = 0; i < 90; i++) {
+        paletteColors.push(`hsl(${(i * 4) % 360}, 70%, 50%)`);
+      }
+
+      function saveData() {
+        localStorage.setItem('polung_members', JSON.stringify(members));
+        localStorage.setItem('polung_tasks', JSON.stringify(tasks));
+        localStorage.setItem('polung_leaves', JSON.stringify(leaveRecords));
+        localStorage.setItem('polung_guards', JSON.stringify(guardAssignments));
+      }
+
+      // 重置歸零
+      document.getElementById('resetDataBtn').addEventListener('click', () => {
+        if (confirm('確定要清除所有進度與資料並重置歸零嗎？')) {
+          localStorage.clear();
+          members = []; tasks = []; leaveRecords = []; guardAssignments = {};
+          selectedFanMembers = []; selectedDaoMembers = [];
+          renderCalendar(); renderTaskCalendar(); renderDayTasks();
+          renderMembers(); renderGuardSlots(); renderPublishedGuards();
+          renderGantt(); renderQuarterlyView(); renderLogTasks();
+          showToast('進度已完全重置歸零！');
+        }
+      });
+
+      const navItems = document.querySelectorAll('.nav-item');
+      const panels = document.querySelectorAll('.panel');
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const targetTab = item.getAttribute('data-tab');
+          navItems.forEach(n => n.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+
+          item.classList.add('active');
+          document.getElementById(`tab-${targetTab}`).classList.add('active');
+
+          if (targetTab === 'coverage') renderGantt();
+          if (targetTab === 'quarterly') renderQuarterlyView();
+        });
+      });
+
+      // 1. 日曆
+      function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        document.getElementById('calLabel').textContent = `${year}年 ${month + 1}月`;
+        document.getElementById('dateBadge').textContent = selectedDateStr;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const calGrid = document.getElementById('calGrid');
+        calGrid.innerHTML = '';
+
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'cal-day other-month';
+          calGrid.appendChild(emptyDiv);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'cal-day';
+          dayDiv.textContent = day;
+
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          if (dateStr === selectedDateStr) dayDiv.classList.add('today');
+
+          if (tasks.some(t => t.date === dateStr) && dateStr !== selectedDateStr) {
+            dayDiv.classList.add('has-tasks');
+          }
+
+          dayDiv.addEventListener('click', () => {
+            selectedDateStr = dateStr;
+            renderCalendar();
+            renderTaskCalendar();
+            renderDayTasks();
+            renderGuardSlots();
+            renderPublishedGuards();
+          });
+
+          calGrid.appendChild(dayDiv);
+        }
+      }
+
+      document.getElementById('prevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+      });
+
+      document.getElementById('nextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+      });
+
+      document.getElementById('todayBtn').addEventListener('click', () => {
+        currentDate = new Date(2026, 7, 16);
+        selectedDateStr = '2026-08-16';
+        renderCalendar();
+        renderTaskCalendar();
+        renderDayTasks();
+        renderGuardSlots();
+        renderPublishedGuards();
+      });
+
+      // 2. 發佈專用月曆
+      function renderTaskCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        document.getElementById('taskCalLabel').textContent = `${year}年 ${month + 1}月 (選擇日期發佈)`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const calGrid = document.getElementById('taskCalGrid');
+        calGrid.innerHTML = '';
+
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'cal-day other-month';
+          calGrid.appendChild(emptyDiv);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'cal-day';
+          dayDiv.textContent = day;
+
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          if (dateStr === selectedDateStr) dayDiv.classList.add('today');
+
+          if (tasks.some(t => t.date === dateStr) && dateStr !== selectedDateStr) {
+            dayDiv.classList.add('has-tasks');
+          }
+
+          dayDiv.addEventListener('click', () => {
+            selectedDateStr = dateStr;
+            renderCalendar();
+            renderTaskCalendar();
+            renderDayTasks();
+          });
+
+          calGrid.appendChild(dayDiv);
+        }
+      }
+
+      document.getElementById('taskPrevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderTaskCalendar();
+      });
+
+      document.getElementById('taskNextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderTaskCalendar();
+      });
+
+      // 3. 當日任務渲染
+      function renderDayTasks() {
+        const container = document.getElementById('dayTaskList');
+        const pubContainer = document.getElementById('publishedTaskList');
+        container.innerHTML = '';
+        pubContainer.innerHTML = '';
+
+        const dayTasks = tasks.filter(t => t.date === selectedDateStr);
+
+        if (dayTasks.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">今日無發佈內容。</p>`;
+          pubContainer.innerHTML = `<p class="hint" style="text-align:center;">該日尚無發佈內容。</p>`;
+          return;
+        }
+
+        dayTasks.forEach(task => {
+          const card = document.createElement('div');
+          card.className = `task-card`;
+          card.style.borderLeftColor = task.color || '#3b82f6';
+
+          let memberOptions = `<option value="未指定">未指定檢核人</option>`;
+          members.forEach(m => {
+            memberOptions += `<option value="${m.name}" ${task.checker === m.name ? 'selected' : ''}>${m.name}</option>`;
+          });
+
+          let assigneeChips = '';
+          if (members.length === 0) {
+            assigneeChips = `<span style="font-size:11px; color:var(--text-sub);">尚未匯入成員</span>`;
+          } else {
+            members.forEach(m => {
+              const isAssigned = (task.assignees || []).includes(m.name);
+              assigneeChips += `
+                <button type="button" class="chip-btn ${isAssigned ? 'active' : ''}" onclick="toggleTaskAssignee('${task.id}', '${m.name}')">
+                  ${m.name}
+                </button>
+              `;
+            });
+          }
+
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="task-title">${task.title}</span>
+              <div>
+                <span class="type-badge" style="background:${task.color || '#3b82f6'};">${task.catName || '任務'}</span>
+                <button class="btn-danger" onclick="deleteTask('${task.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
+            </div>
+            <div class="task-desc">${task.desc || '無詳細說明'}</div>
+            <div style="font-size:11px; font-weight:700; color:var(--primary);">
+              <i class="fa-regular fa-clock"></i> 預計時間：${task.duration || 15} 分鐘
+            </div>
+            <div>
+              <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:2px;">點選成員分派參與：</div>
+              <div class="assignee-chips">${assigneeChips}</div>
+            </div>
+            <div class="task-controls">
+              <div>
+                <label style="font-size:11px;">狀態：</label>
+                <select class="select-sm" onchange="updateTaskStatus('${task.id}', this.value)">
+                  <option value="待執行" ${task.status === '待執行' ? 'selected' : ''}>待執行</option>
+                  <option value="進行中" ${task.status === '進行中' ? 'selected' : ''}>進行中</option>
+                  <option value="已完成" ${task.status === '已完成' ? 'selected' : ''}>已完成</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;">檢核人：</label>
+                <select class="select-sm" onchange="updateTaskChecker('${task.id}', this.value)">
+                  ${memberOptions}
+                </select>
+              </div>
+            </div>
+          `;
+
+          container.appendChild(card);
+          pubContainer.appendChild(card.cloneNode(true));
+        });
+      }
+
+      window.toggleTaskAssignee = function(taskId, memberName) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          if (!task.assignees) task.assignees = [];
+          const index = task.assignees.indexOf(memberName);
+          if (index > -1) task.assignees.splice(index, 1);
+          else task.assignees.push(memberName);
+          saveData(); renderDayTasks(); renderLogTasks();
+        }
+      };
+
+      window.deleteTask = function(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards();
+        showToast('已刪除');
+      };
+
+      window.updateTaskStatus = function(id, val) {
+        const t = tasks.find(x => x.id === id);
+        if (t) { t.status = val; saveData(); }
+      };
+
+      window.updateTaskChecker = function(id, val) {
+        const t = tasks.find(x => x.id === id);
+        if (t) { t.checker = val; saveData(); }
+      };
+
+      // 4. 成員管理
+      function renderMembers() {
+        const container = document.getElementById('deptMemberList');
+        container.innerHTML = '';
+
+        if (members.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">目前無成員資料。</p>`;
+          return;
+        }
+
+        const depts = {};
+        members.forEach(m => {
+          if (!depts[m.dept]) depts[m.dept] = [];
+          depts[m.dept].push(m);
+        });
+
+        Object.keys(depts).sort().forEach(deptName => {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'dept-group';
+          groupDiv.innerHTML = `<div class="dept-title">${deptName} (${depts[deptName].length}人)</div>`;
+
+          const ul = document.createElement('ul');
+          ul.className = 'member-list';
+
+          depts[deptName].forEach(m => {
+            const li = document.createElement('li');
+            li.className = 'member-item';
+            li.innerHTML = `
+              <div>
+                <span style="font-weight:700;">${m.name}</span>
+                <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">${m.role}</span>
+              </div>
+              <button class="btn-danger" onclick="removeMember('${m.id}')"><i class="fa-solid fa-user-minus"></i></button>
+            `;
+            ul.appendChild(li);
+          });
+
+          groupDiv.appendChild(ul);
+          container.appendChild(groupDiv);
+        });
+      }
+
+      document.getElementById('addMemberBtn').addEventListener('click', () => {
+        const name = document.getElementById('name').value.trim();
+        const dept = document.getElementById('dept').value.trim() || '未分類部門';
+        const role = document.getElementById('role').value.trim() || '成員';
+
+        if (!name) return showToast('請填寫姓名！');
+
+        members.push({ id: Date.now().toString(), name, dept, role });
+        document.getElementById('name').value = '';
+        saveData(); renderMembers(); renderDayTasks(); renderGuardSlots(); renderGantt();
+        showToast('成員新增成功！');
+      });
+
+      window.removeMember = function(id) {
+        members = members.filter(m => m.id !== id);
+        saveData(); renderMembers(); renderDayTasks(); renderGuardSlots(); renderGantt();
+      };
+
+      // 5. 衛哨排班與防誤排檢查
+      document.getElementById('modeGuardBtn').addEventListener('click', () => {
+        guardMode = 'guard';
+        document.getElementById('modeGuardBtn').classList.add('active');
+        document.getElementById('modeSafeBtn').classList.remove('active');
+        renderGuardSlots();
+      });
+
+      document.getElementById('modeSafeBtn').addEventListener('click', () => {
+        guardMode = 'safe';
+        document.getElementById('modeSafeBtn').classList.add('active');
+        document.getElementById('modeGuardBtn').classList.remove('active');
+        renderGuardSlots();
+      });
+
+      document.getElementById('guardDate').addEventListener('change', (e) => {
+        if (e.target.value) {
+          selectedDateStr = e.target.value;
+          renderCalendar(); renderTaskCalendar(); renderGuardSlots(); renderPublishedGuards();
+        }
+      });
+
+      function renderGuardSlots() {
+        const container = document.getElementById('guardSlots');
+        container.innerHTML = '';
+
+        let shifts = [];
+        if (guardMode === 'guard') {
+          shifts = [
+            '22:00-00:00', '00:00-02:00', '02:00-04:00', '04:00-06:00',
+            '06:00-08:00', '08:00-10:00', '10:00-12:00', '12:00-14:00',
+            '14:00-16:00', '16:00-18:00', '18:00-20:00', '20:00-22:00'
+          ];
+        } else {
+          shifts = [
+            '22:00-00:00 (夜間)', '00:00-02:00 (夜間)', '02:00-04:00 (夜間)', '04:00-06:00 (夜間)',
+            '06:00-12:00 (日間)', '12:00-18:00 (日間)', '18:00-22:00 (夜間接續)'
+          ];
+        }
+
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        if (!guardAssignments[dateVal]) guardAssignments[dateVal] = {};
+
+        shifts.forEach(s => {
+          const slot = document.createElement('div');
+          slot.className = 'guard-slot-card';
+
+          const currentAssigned = guardAssignments[dateVal][s] || '';
+
+          let optionsHtml = `<option value="">-- 請選擇人員 --</option>`;
+          members.forEach(m => {
+            // 檢查該員當日是否在休假中
+            const isOff = leaveRecords.some(r => r.memberName === m.name && dateVal >= r.start && dateVal <= r.end);
+            const labelStr = isOff ? `${m.name} (${m.dept}) [休假中]` : `${m.name} (${m.dept})`;
+            optionsHtml += `<option value="${m.name}" ${currentAssigned === m.name ? 'selected' : ''}>${labelStr}</option>`;
+          });
+
+          slot.innerHTML = `
+            <span style="font-size:12px; font-weight:700; color:var(--primary);">${s}</span>
+            <div style="flex:1; max-width:180px; margin-left:12px;">
+              <select class="select-sm" style="width:100%;" onchange="assignGuardSlot('${dateVal}', '${s}', this.value)">
+                ${optionsHtml}
+              </select>
+            </div>
+          `;
+
+          container.appendChild(slot);
+        });
+      }
+
+      window.assignGuardSlot = function(date, shift, memberName) {
+        if (!guardAssignments[date]) guardAssignments[date] = {};
+        if (memberName) {
+          // 若選取休假的成員進行提醒
+          const isOff = leaveRecords.some(r => r.memberName === memberName && date >= r.start && date <= r.end);
+          if (isOff) showToast(`提醒：${memberName} 在該日有休假紀錄！`);
+          guardAssignments[date][shift] = memberName;
+        } else {
+          delete guardAssignments[date][shift];
+        }
+        saveData();
+      };
+
+      document.getElementById('publishGuardTaskBtn').addEventListener('click', () => {
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        const currentData = guardAssignments[dateVal] || {};
+
+        const entries = Object.entries(currentData);
+        if (entries.length === 0) return showToast('尚未指派人員！');
+
+        let guardListText = [];
+        let safeListText = [];
+
+        entries.forEach(([time, name]) => {
+          if (time.includes('夜間') || time.includes('日間')) {
+            safeListText.push(`• ${time}：${name}`);
+          } else {
+            guardListText.push(`• ${time}：${name}`);
+          }
+        });
+
+        let summaryDesc = '';
+        if (guardListText.length > 0) summaryDesc += `【衛哨勤務】\n` + guardListText.join('\n') + '\n\n';
+        if (safeListText.length > 0) summaryDesc += `【安全勤務】\n` + safeListText.join('\n');
+
+        tasks.push({
+          id: Date.now().toString(),
+          title: '衛哨表',
+          desc: summaryDesc,
+          date: dateVal,
+          duration: 120,
+          color: '#f97316',
+          catName: '衛哨勤務',
+          status: '待執行',
+          checker: '未指定',
+          assignees: Object.values(currentData)
+        });
+
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards();
+        showToast('衛哨表發佈成功！');
+      });
+
+      function renderPublishedGuards() {
+        const container = document.getElementById('publishedGuardList');
+        container.innerHTML = '';
+
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        const guardTasks = tasks.filter(t => t.date === dateVal && t.title === '衛哨表');
+
+        if (guardTasks.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">當日尚無衛哨表紀錄。</p>`;
+          return;
+        }
+
+        guardTasks.forEach(gt => {
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.style.borderLeftColor = '#f97316';
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="task-title"><i class="fa-solid fa-shield-halved"></i> 衛哨表 (${gt.date})</span>
+              <div>
+                <button class="btn-danger" onclick="deleteTask('${gt.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
+            </div>
+            <div class="task-desc">${gt.desc}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // 6. 自訂類型與配色
+      function renderColorPicker() {
+        const grid = document.getElementById('colorPickerGrid');
+        grid.innerHTML = '';
+
+        paletteColors.forEach(c => {
+          const box = document.createElement('div');
+          box.className = 'color-box';
+          box.style.backgroundColor = c;
+          if (c === selectedColor) box.classList.add('selected');
+
+          box.addEventListener('click', () => {
+            document.querySelectorAll('.color-box').forEach(b => b.classList.remove('selected'));
+            box.classList.add('selected');
+            selectedColor = c;
+          });
+
+          grid.appendChild(box);
+        });
+      }
+
+      function renderCatSelectAndList() {
+        const select = document.getElementById('taskCatSelect');
+        const list = document.getElementById('catManageList');
+        select.innerHTML = ''; list.innerHTML = '';
+
+        customCategories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat.id; opt.textContent = cat.name;
+          select.appendChild(opt);
+
+          const item = document.createElement('div');
+          item.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:6px 10px; border-radius:8px; margin-bottom:4px;';
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:14px; height:14px; border-radius:4px; background:${cat.color};"></div>
+              <span style="font-size:12px; font-weight:700;">${cat.name}</span>
+            </div>
+            <button class="btn-danger" onclick="removeCategory('${cat.id}')"><i class="fa-solid fa-xmark"></i></button>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      document.getElementById('addCatBtn').addEventListener('click', () => {
+        const name = document.getElementById('newCatName').value.trim();
+        if (!name) return showToast('請輸入類型名稱！');
+
+        customCategories.push({ id: `cat-${Date.now()}`, name, color: selectedColor });
+        document.getElementById('newCatName').value = '';
+        renderCatSelectAndList();
+        showToast('新類型已建立');
+      });
+
+      window.removeCategory = function(id) {
+        customCategories = customCategories.filter(c => c.id !== id);
+        renderCatSelectAndList();
+      };
+
+      document.getElementById('decDuration').addEventListener('click', () => {
+        if (estimatedDuration > 15) {
+          estimatedDuration -= 15;
+          document.getElementById('durationDisplay').textContent = `${estimatedDuration} 分鐘`;
+        }
+      });
+
+      document.getElementById('incDuration').addEventListener('click', () => {
+        estimatedDuration += 15;
+        document.getElementById('durationDisplay').textContent = `${estimatedDuration} 分鐘`;
+      });
+
+      document.getElementById('publishTaskBtn').addEventListener('click', () => {
+        const title = document.getElementById('taskTitle').value.trim();
+        const desc = document.getElementById('taskDesc').value.trim();
+        const date = selectedDateStr;
+        const catId = document.getElementById('taskCatSelect').value;
+
+        const catObj = customCategories.find(c => c.id === catId) || { name: '一般任務', color: '#3b82f6' };
+
+        if (!title) return showToast('請輸入任務名稱！');
+
+        tasks.push({
+          id: Date.now().toString(),
+          title, desc, date,
+          duration: estimatedDuration,
+          color: catObj.color,
+          catName: catObj.name,
+          status: '待執行',
+          checker: '未指定',
+          assignees: []
+        });
+
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDesc').value = '';
+
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks();
+        showToast('發佈成功！');
+      });
+
+      // 7. 分頁 6：戰力比甘特圖 (一個月前10後20) 與獨立批次區塊
+      function renderMemberBatchChips() {
+        const fanContainer = document.getElementById('fanMemberChips');
+        const daoContainer = document.getElementById('daoMemberChips');
+        fanContainer.innerHTML = ''; daoContainer.innerHTML = '';
+
+        if (members.length === 0) {
+          fanContainer.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">無成員</span>`;
+          daoContainer.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">無成員</span>`;
+          return;
+        }
+
+        members.forEach(m => {
+          // 返台選人晶片
+          const isFanSel = selectedFanMembers.includes(m.name);
+          const fanBtn = document.createElement('button');
+          fanBtn.type = 'button';
+          fanBtn.className = `chip-btn ${isFanSel ? 'active' : ''}`;
+          fanBtn.textContent = m.name;
+          fanBtn.onclick = () => {
+            if (isFanSel) selectedFanMembers = selectedFanMembers.filter(x => x !== m.name);
+            else selectedFanMembers.push(m.name);
+            renderMemberBatchChips();
+          };
+          fanContainer.appendChild(fanBtn);
+
+          // 島休選人晶片
+          const isDaoSel = selectedDaoMembers.includes(m.name);
+          const daoBtn = document.createElement('button');
+          daoBtn.type = 'button';
+          daoBtn.className = `chip-btn ${isDaoSel ? 'active' : ''}`;
+          daoBtn.textContent = m.name;
+          daoBtn.onclick = () => {
+            if (isDaoSel) selectedDaoMembers = selectedDaoMembers.filter(x => x !== m.name);
+            else selectedDaoMembers.push(m.name);
+            renderMemberBatchChips();
+          };
+          daoContainer.appendChild(daoBtn);
+        });
+      }
+
+      // 新增返台 (批次)
+      document.getElementById('addFanBtn').addEventListener('click', () => {
+        const start = document.getElementById('fanStart').value;
+        const end = document.getElementById('fanEnd').value;
+
+        if (!start || !end) return showToast('請選擇返台開始與結束日期！');
+        if (selectedFanMembers.length === 0) return showToast('請至少點選一位返台成員！');
+
+        selectedFanMembers.forEach(memberName => {
+          leaveRecords.push({ id: Date.now().toString() + Math.random(), memberName, type: '返', start, end });
+        });
+
+        selectedFanMembers = [];
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
+        showToast('批次新增返台紀錄成功！');
+      });
+
+      // 新增島休 (批次)
+      document.getElementById('addDaoBtn').addEventListener('click', () => {
+        const singleDate = document.getElementById('daoSingleDate').value;
+
+        if (!singleDate) return showToast('請選擇島休日期！');
+        if (selectedDaoMembers.length === 0) return showToast('請至少點選一位島休成員！');
+
+        selectedDaoMembers.forEach(memberName => {
+          leaveRecords.push({ id: Date.now().toString() + Math.random(), memberName, type: '島', start: singleDate, end: singleDate });
+        });
+
+        selectedDaoMembers = [];
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
+        showToast('批次新增島休成功！');
+      });
+
+      function renderLeaveList() {
+        const container = document.getElementById('leaveRecordsList');
+        container.innerHTML = '';
+
+        if (leaveRecords.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">尚無登錄休假紀錄。</p>`;
+          return;
+        }
+
+        leaveRecords.forEach(rec => {
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.style.borderLeftColor = rec.type === '返' ? '#3b82f6' : '#f59e0b';
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="task-title">${rec.memberName} (${rec.type === '返' ? '返休區間' : '島休單日'})</span>
+              <button class="btn-danger" onclick="deleteLeaveRecord('${rec.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+            </div>
+            <div class="task-desc">${rec.start} ${rec.type === '返' ? '至 ' + rec.end : ''}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.deleteLeaveRecord = function(id) {
+        leaveRecords = leaveRecords.filter(r => r.id !== id);
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView();
+        showToast('已刪除休假紀錄');
+      };
+
+      // 渲染一個月度甘特圖 (前 10 日 + 後 20 日，共 30 日)
+      function renderGantt() {
+        const headerRow = document.getElementById('ganttHeaderRow');
+        const body = document.getElementById('ganttBody');
+        const footer = document.getElementById('ganttCoverageFooter');
+
+        headerRow.innerHTML = '<th>成員</th>';
+        body.innerHTML = '';
+        footer.innerHTML = '<th>戰力比</th>';
+
+        const dates = [];
+        const baseDate = new Date(2026, 7, 16); // 當前日期 8/16
+
+        // 前 10 日 + 當日 + 後 19 日 (共 30 日)
+        for (let i = -10; i < 20; i++) {
+          const d = new Date(baseDate);
+          d.setDate(baseDate.getDate() + i);
+
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const fullDateStr = `${yyyy}-${mm}-${dd}`;
+          const displayStr = `${d.getMonth()+1}/${d.getDate()}`;
+          const isToday = (i === 0);
+
+          dates.push({ full: fullDateStr, display: displayStr, isToday });
+          headerRow.innerHTML += `<th class="${isToday ? 'today-col' : ''}">${displayStr}</th>`;
+        }
+
+        if (members.length === 0) {
+          body.innerHTML = `<tr><td colspan="31" style="text-align:center; padding:12px;">尚無成員資料</td></tr>`;
+          return;
+        }
+
+        let totalFan = 0; let totalDao = 0;
+
+        members.forEach(m => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td><b>${m.name}</b></td>`;
+
+          dates.forEach(dObj => {
+            const hasFan = leaveRecords.some(r => r.memberName === m.name && r.type === '返' && dObj.full >= r.start && dObj.full <= r.end);
+            const hasDao = leaveRecords.some(r => r.memberName === m.name && r.type === '島' && dObj.full >= r.start && dObj.full <= r.end);
+
+            if (hasFan) {
+              tr.innerHTML += `<td><span class="badge-fan">返</span></td>`;
+              totalFan++;
+            } else if (hasDao) {
+              tr.innerHTML += `<td><span class="badge-dao">島</span></td>`;
+              totalDao++;
+            } else {
+              tr.innerHTML += `<td><span style="color:#cbd5e1;">•</span></td>`;
+            }
+          });
+          body.appendChild(tr);
+        });
+
+        // 戰力比例精確計算公式
+        let sumRatio = 0;
+        dates.forEach(dObj => {
+          const leaveCount = leaveRecords.filter(r => dObj.full >= r.start && dObj.full <= r.end).length;
+          const ratio = members.length > 0 ? Math.max(0, Math.round(((members.length - leaveCount) / members.length) * 100)) : 100;
+          sumRatio += ratio;
+
+          let cssClass = 'cov-good';
+          if (ratio < 70) cssClass = 'cov-danger'; // 戰力低於 70% 警告
+          else if (ratio < 85) cssClass = 'cov-warn';
+
+          footer.innerHTML += `<td class="${cssClass}">${ratio}%</td>`;
+        });
+
+        const avgRatio = Math.round(sumRatio / dates.length);
+        document.getElementById('covRateVal').textContent = `${avgRatio}%`;
+        document.getElementById('fanCountVal').textContent = `${totalFan} 人次`;
+        document.getElementById('daoCountVal').textContent = `${totalDao} 人次`;
+
+        renderMemberBatchChips();
+        renderLeaveList();
+      }
+
+      // 8. 分頁 7：縮圖月曆與統計
+      function renderQuarterlyView() {
+        const grid = document.getElementById('quarterGrid');
+        const tbody = document.getElementById('leaveQuotaBody');
+        grid.innerHTML = ''; tbody.innerHTML = '';
+
+        const months = [
+          { name: '2026年 7月', days: 31, startDay: 3, mIdx: 6 },
+          { name: '2026年 8月', days: 31, startDay: 6, mIdx: 7 },
+          { name: '2026年 9月', days: 30, startDay: 2, mIdx: 8 }
+        ];
+
+        months.forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'mini-cal';
+          card.innerHTML = `<div class="mini-cal-title">${m.name}</div>`;
+
+          const miniGrid = document.createElement('div');
+          miniGrid.className = 'mini-grid';
+
+          for (let i = 0; i < m.startDay; i++) {
+            miniGrid.innerHTML += `<div class="mini-day" style="opacity:0;"></div>`;
+          }
+
+          for (let day = 1; day <= m.days; day++) {
+            const dateStr = `2026-${String(m.mIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const hasLeave = leaveRecords.some(r => dateStr >= r.start && dateStr <= r.end);
+            miniGrid.innerHTML += `<div class="mini-day ${hasLeave ? 'has-leave' : ''}">${day}</div>`;
+          }
+
+          card.appendChild(miniGrid);
+          grid.appendChild(card);
+        });
+
+        if (members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:12px;">尚無成員資料</td></tr>`;
+          return;
+        }
+
+        members.forEach(m => {
+          const fanCount = leaveRecords.filter(r => r.memberName === m.name && r.type === '返').length;
+          const daoCount = leaveRecords.filter(r => r.memberName === m.name && r.type === '島').length;
+
+          tbody.innerHTML += `
+            <tr>
+              <td><b>${m.name}</b> (${m.dept})</td>
+              <td>${fanCount} 次</td>
+              <td>${daoCount} 天</td>
+            </tr>
+          `;
+        });
+      }
+
+      // 日誌渲染
+      function renderLogTasks() {
+        const container = document.getElementById('logTaskList');
+        container.innerHTML = '';
+
+        const start = document.getElementById('logStart').value;
+        const end = document.getElementById('logEnd').value;
+
+        let filtered = tasks;
+        if (start && end) {
+          filtered = tasks.filter(t => t.date >= start && t.date <= end);
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">此區間無紀錄。</p>`;
+          return;
+        }
+
+        filtered.forEach(t => {
+          const card = document.createElement('div');
+          card.className = `task-card`;
+          card.style.borderLeftColor = t.color || '#3b82f6';
+          const assignedText = t.assignees && t.assignees.length > 0 ? t.assignees.join(', ') : '未分派成員';
+          card.innerHTML = `
+            <div style="font-weight:700;">${t.title} (${t.date})</div>
+            <div style="font-size:12px; color:var(--text-sub); white-space:pre-line;">${t.desc}</div>
+            <div style="font-size:11px; color:var(--primary); margin-top:2px;">預計時間：${t.duration || 15} 分鐘 | 參與成員：${assignedText}</div>
+            <div style="font-size:11px; margin-top:4px;">狀態：${t.status} | 檢核人：${t.checker}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      document.getElementById('logStart').addEventListener('change', renderLogTasks);
+      document.getElementById('logEnd').addEventListener('change', renderLogTasks);
+
+      // 初始化頁面預設值
+      document.getElementById('guardDate').value = selectedDateStr;
+      document.getElementById('logStart').value = selectedDateStr;
+      document.getElementById('logEnd').value = selectedDateStr;
+      document.getElementById('fanStart').value = selectedDateStr;
+      document.getElementById('fanEnd').value = selectedDateStr;
+      document.getElementById('daoSingleDate').value = selectedDateStr;
+
+      renderCalendar();
+      renderTaskCalendar();
+      renderDayTasks();
+      renderMembers();
+      renderGuardSlots();
+      renderPublishedGuards();
+      renderColorPicker();
+      renderCatSelectAndList();
+      renderLogTasks();
+      renderGantt();
+      renderQuarterlyView();
+    });
   </script>
 </body>
 </html>

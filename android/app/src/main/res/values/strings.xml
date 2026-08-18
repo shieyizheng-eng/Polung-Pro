@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Polung-Pro</string>
+    <string name="title_activity_main">Polung-Pro</string>
+    <string name="package_name">com.polung.app</string>
+    <string name="custom_url_scheme">com.polung.app</string>
+</resources>
