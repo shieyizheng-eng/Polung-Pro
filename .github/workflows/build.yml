@@ -29,8 +29,9 @@ jobs:
           npm install
           npm install -g @capacitor/cli
 
-      - name: Sync Capacitor
+      - name: Sync and Copy Web Assets
         run: |
+          npx cap copy android
           npx cap sync android
 
       - name: Build Android APK
