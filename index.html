@@ -1,3 +1,34 @@
+// 引入 Capgo 熱更新檢查邏輯
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
+
+async function checkAppUpdate() {
+  try {
+    // 向您的 GitHub Release 檢查最新版本 zip 檔
+    const response = await fetch('https://api.github.com/repos/shieyizheng-eng/Polung-Pro/releases/latest');
+    const data = await response.json();
+    
+    // 取得遠端 zip 下載連結與版本號
+    const latestVersion = data.tag_name;
+    const downloadUrl = data.assets.find(a => a.name.endsWith('.zip'))?.browser_download_url;
+
+    if (downloadUrl) {
+      showToast('正在背景下載最新程式碼更新...');
+      // 下載並套用更新
+      const version = await CapacitorUpdater.download({
+        url: downloadUrl,
+        version: latestVersion,
+      });
+      await CapacitorUpdater.set(version);
+      showToast('更新完成！下次啟動 App 將自動套用新版');
+    }
+  } catch (err) {
+    console.log('熱更新檢查失敗或目前無新版本', err);
+  }
+}
+
+// App 開啟時自動執行更新檢查
+checkAppUpdate();
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -63,7 +94,6 @@
     h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text-main); }
     .hint { font-size: 12px; color: var(--text-sub); margin-top: 6px; margin-bottom: 12px; }
 
-    /* 行事曆 */
     .cal-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .cal-label { font-size: 15px; font-weight: 700; }
@@ -77,9 +107,8 @@
     .cal-day.today { background: var(--primary); color: #ffffff; border-color: var(--primary); }
     .cal-day.other-month { opacity: 0.3; cursor: default; }
 
-    /* 任務卡片 */
     .task-list { display: flex; flex-direction: column; gap: 12px; }
-    .task-card { background: var(--card-bg); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; color: var(--text-main); }
+    .task-card { background: var(--card-bg); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; color: var(--text-main); position: relative; }
     .task-header { display: flex; align-items: center; justify-content: space-between; }
     .task-title { font-size: 15px; font-weight: 700; }
     .task-desc { font-size: 12px; color: var(--text-sub); white-space: pre-line; }
@@ -89,7 +118,6 @@
     .task-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border-color); }
     .select-sm { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 12px; background: var(--bg-color); color: var(--text-main); }
 
-    /* 表單與按鈕 */
     .form-group { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .input-field { margin-bottom: 12px; }
     .input-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
@@ -105,7 +133,6 @@
     .btn-danger { background: #fee2e2; color: var(--danger); padding: 6px 10px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; }
     .btn-reset { background: #fee2e2; color: var(--danger); font-size: 12px; padding: 4px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; }
 
-    /* 部門區塊晶片 */
     .dept-block { margin-bottom: 8px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px; }
     .dept-block-header { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
     .assignee-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -132,7 +159,6 @@
     .guard-col { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); }
     .guard-col-title { font-weight: 700; color: var(--primary); margin-bottom: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px; }
 
-    /* 甘特圖表格 */
     .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
     .metric-card { background: var(--card-bg); padding: 12px 8px; border-radius: 12px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
     .metric-val { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; }
@@ -161,7 +187,6 @@
     .badge-jian { background: #ec4899; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
     .badge-ce { background: #10b981; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
 
-    /* 戰力比深色模式相容配色 */
     .cov-good { background: #dcfce7; color: #15803d; font-weight:700; }
     .cov-warn { background: #fef3c7; color: #b45309; font-weight:700; }
     .cov-danger { background: #fee2e2; color: #b91c1c; font-weight:700; }
@@ -179,8 +204,7 @@
 
     .ms-bar { width: 100%; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border-radius: 4px; color: #1e293b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 
-    /* WARNO 預令樣式卡片 */
-    .warno-card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .warno-card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm); position: relative; }
     .warno-section { margin-bottom: 14px; background: var(--bg-color); padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--primary); }
     .warno-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
 
@@ -191,10 +215,14 @@
 
     .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85); color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 100; display: none; }
 
+    .log-checkbox-wrapper { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; z-index: 5; }
+    .log-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
     @media print {
-      .bottom-nav, .topbar-actions, .btn, .btn-danger, .btn-edit, .order-btn-group, .btn-reset { display: none !important; }
+      .bottom-nav, .topbar-actions, .btn, .btn-danger, .btn-edit, .order-btn-group, .btn-reset, .log-controls, .log-checkbox-wrapper { display: none !important; }
       .app-container { height: auto; max-width: 100%; box-shadow: none; }
       main { overflow-y: visible; padding-bottom: 0; }
+      .task-card:not(.selected-for-export), .warno-card:not(.selected-for-export) { display: none !important; }
     }
   </style>
 </head>
@@ -262,7 +290,7 @@
         <div id="deptMemberList"></div>
       </section>
 
-      <!-- Panel 3: 衛哨排班 (附帶左右週切換) -->
+      <!-- Panel 3: 衛哨排班 -->
       <section id="tab-guard" class="panel">
         <h2>
           <span>本週衛哨/安官執勤週曆矩陣 (週一至週日)</span>
@@ -552,14 +580,26 @@
         <div id="logTaskList" class="task-list"></div>
 
         <h2 style="margin-top:20px;">日誌輸出與呈核</h2>
-        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
+        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
+          <div style="display:flex; gap:16px;">
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="selectAllLogBtn" checked onchange="toggleAllLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
+            </label>
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="deselectAllLogBtn" onchange="toggleAllLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
+            </label>
+          </div>
+        </div>
+
+        <div class="log-controls" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
           <button class="btn btn-ghost" onclick="exportPrintPDF()"><i class="fa-solid fa-file-pdf"></i> 高解析 PDF / 列印</button>
           <button class="btn btn-ghost" onclick="exportTextSummary()"><i class="fa-solid fa-file-lines"></i> 複製文字摘要 (LINE群)</button>
         </div>
       </section>
     </main>
 
-    <!-- 底欄 Navigation (新增 Warno 預令) -->
+    <!-- 底欄 Navigation -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="date"><i class="fa-solid fa-calendar-days"></i><span>行事曆</span></button>
       <button class="nav-item" data-tab="members"><i class="fa-solid fa-users"></i><span>成員</span></button>
@@ -730,6 +770,7 @@
           if (targetTab === 'warno') { renderWarnos(); }
           if (targetTab === 'coverage') { renderMilestones(); renderGantt(); }
           if (targetTab === 'quarterly') renderQuarterlyView();
+          if (targetTab === 'log') renderLogTasks();
         });
       });
 
@@ -1485,6 +1526,7 @@
 
         saveData();
         renderWarnos();
+        renderLogTasks();
         showToast('WARNO 預備命令發佈成功！');
       });
 
@@ -1542,6 +1584,7 @@
         warnos = warnos.filter(w => w.id !== id);
         saveData();
         renderWarnos();
+        renderLogTasks();
         showToast('已刪除預令');
       };
 
@@ -2156,21 +2199,50 @@
         const start = document.getElementById('logStart').value;
         const end = document.getElementById('logEnd').value;
 
-        let filtered = tasks;
+        let filteredTasks = tasks;
+        let filteredWarnos = warnos;
+
         if (start && end) {
-          filtered = tasks.filter(t => t.date >= start && t.date <= end);
+          filteredTasks = tasks.filter(t => t.date >= start && t.date <= end);
+          filteredWarnos = warnos.filter(w => w.date >= start && w.date <= end);
         }
 
-        if (filtered.length === 0) {
-          container.innerHTML = `<p class="hint" style="text-align:center;">此區間無紀錄。</p>`;
+        if (filteredTasks.length === 0 && filteredWarnos.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">此區間無發佈或預令紀錄。</p>`;
           return;
         }
 
-        filtered.forEach(t => {
+        filteredWarnos.forEach(w => {
           const card = document.createElement('div');
-          card.className = `task-card`;
+          card.className = 'warno-card log-item-card selected-for-export';
+          card.dataset.type = 'warno';
+          card.dataset.id = w.id;
+
+          card.innerHTML = `
+            <label class="log-checkbox-wrapper">
+              <input type="checkbox" class="log-checkbox" checked onchange="toggleLogCardSelection(this)" />
+              <span style="font-size:11px; font-weight:700;">選取</span>
+            </label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border-color);">
+              <span style="font-size:15px; font-weight:700; color:#8b5cf6;"><i class="fa-solid fa-scroll"></i> [WARNO 預令] ${w.title}</span>
+              <span style="font-size:11px; color:var(--text-sub); margin-right:60px;">${w.date}</span>
+            </div>
+            <div class="warno-section"><div class="warno-title">1. 狀況</div><div class="task-desc">${w.sit || '無'}</div></div>
+            <div class="warno-section"><div class="warno-title">2. 任務</div><div class="task-desc">${w.mis || '無'}</div></div>
+            <div class="warno-section"><div class="warno-title">3. 執行</div><div class="task-desc">${w.exe || '無'}</div></div>
+            <div class="warno-section"><div class="warno-title">4. 假定事項</div><div class="task-desc">${w.ass || '無'}</div></div>
+            <div class="warno-section"><div class="warno-title">5. 應變措施</div><div class="task-desc">${w.con || '無'}</div></div>
+          `;
+          container.appendChild(card);
+        });
+
+        filteredTasks.forEach(t => {
+          const card = document.createElement('div');
+          card.className = `task-card log-item-card selected-for-export`;
           card.style.borderLeftColor = t.color || '#3b82f6';
-          
+          card.dataset.type = 'task';
+          card.dataset.id = t.id;
+
           const memberInfo = t.isGuardTask 
             ? `預計時間：${t.duration || 120} 分鐘` 
             : `預計時間：${t.duration || 15} 分鐘 | 參與成員：${t.assignees && t.assignees.length > 0 ? t.assignees.join(', ') : '未分派成員'}`;
@@ -2178,7 +2250,11 @@
           const coordHtml = t.coord ? `<div style="font-size:11px; color:var(--primary); font-weight:700;">📌 協調事項：${t.coord}</div>` : '';
 
           card.innerHTML = `
-            <div style="font-weight:700;">${t.title} (${t.date})</div>
+            <label class="log-checkbox-wrapper">
+              <input type="checkbox" class="log-checkbox" checked onchange="toggleLogCardSelection(this)" />
+              <span style="font-size:11px; font-weight:700;">選取</span>
+            </label>
+            <div style="font-weight:700; padding-right:60px;">${t.title} (${t.date})</div>
             <div style="font-size:12px; color:var(--text-sub); white-space:pre-line;">${t.desc}</div>
             ${coordHtml}
             <div style="font-size:11px; color:var(--primary); margin-top:4px;">${memberInfo}</div>
@@ -2188,7 +2264,28 @@
         });
       }
 
+      window.toggleLogCardSelection = function(checkboxElem) {
+        const card = checkboxElem.closest('.log-item-card');
+        if (checkboxElem.checked) {
+          card.classList.add('selected-for-export');
+        } else {
+          card.classList.remove('selected-for-export');
+        }
+      };
+
+      window.toggleAllLogSelection = function(selectAll) {
+        const checkboxes = document.querySelectorAll('.log-checkbox');
+        checkboxes.forEach(cb => {
+          cb.checked = selectAll;
+          toggleLogCardSelection(cb);
+        });
+        document.getElementById('selectAllLogBtn').checked = selectAll;
+        document.getElementById('deselectAllLogBtn').checked = !selectAll;
+      };
+
       window.exportPrintPDF = function() {
+        const selectedCards = document.querySelectorAll('.log-item-card.selected-for-export');
+        if (selectedCards.length === 0) return showToast('請至少勾選一個項目匯出！');
         window.print();
       };
 
@@ -2196,21 +2293,38 @@
         const start = document.getElementById('logStart').value;
         const end = document.getElementById('logEnd').value;
 
-        let filtered = tasks;
-        if (start && end) filtered = tasks.filter(t => t.date >= start && t.date <= end);
+        const selectedCards = document.querySelectorAll('.log-item-card.selected-for-export');
+        if (selectedCards.length === 0) return showToast('請至少勾選一個項目匯出！');
 
-        if (filtered.length === 0) return showToast('此區間無內容可複製');
+        let text = `【排部/迫砲排 任務與預令摘要】(${start} ~ ${end})\n----------------------------\n`;
 
-        let text = `【排部/迫砲排 任務與衛哨發佈】(${start} ~ ${end})\n----------------------------\n`;
-        filtered.forEach((t, i) => {
-          text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
-          if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
-          if (t.coord) text += `   協調事項：${t.coord}\n`;
-          text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
+        selectedCards.forEach((card, i) => {
+          const type = card.dataset.type;
+          const id = card.dataset.id;
+
+          if (type === 'warno') {
+            const w = warnos.find(item => item.id === id);
+            if (w) {
+              text += `${i + 1}. [WARNO 預備命令] ${w.title} (${w.date})\n`;
+              text += `   1.狀況：${w.sit || '無'}\n`;
+              text += `   2.任務：${w.mis || '無'}\n`;
+              text += `   3.執行：${w.exe || '無'}\n`;
+              text += `   4.假定：${w.ass || '無'}\n`;
+              text += `   5.應變：${w.con || '無'}\n\n`;
+            }
+          } else if (type === 'task') {
+            const t = tasks.find(item => item.id === id);
+            if (t) {
+              text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
+              if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
+              if (t.coord) text += `   協調事項：${t.coord}\n`;
+              text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
+            }
+          }
         });
 
         navigator.clipboard.writeText(text).then(() => {
-          showToast('任務摘要已複製到剪貼簿，可直接貼至LINE！');
+          showToast('已複製已選取的摘要至剪貼簿！');
         });
       };
 
