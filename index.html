@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>任務發佈板 (WARNO & 戰力排版優化版)</title>
+  <title>任務發佈板</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -203,7 +203,7 @@
       <div class="topbar-actions">
         <button id="wakeLockBtn" class="btn-toggle-icon" onclick="toggleWakeLock()"><i class="fa-solid fa-lightbulb"></i> 恆亮</button>
         <button id="darkModeBtn" class="btn-toggle-icon" onclick="toggleDarkMode()"><i class="fa-solid fa-moon"></i> 深色</button>
-        <div id="dateBadge" class="date-badge">2026/08/16</div>
+        <div id="dateBadge" class="date-badge"></div>
       </div>
     </header>
 
@@ -469,6 +469,7 @@
             <div class="input-field" style="flex:1;"><label>開始日期</label><input id="fanStart" type="date" /></div>
             <div class="input-field" style="flex:1;"><label>結束日期</label><input id="fanEnd" type="date" /></div>
           </div>
+          <div class="input-field"><label>備註（例如：班機次、受訓地點、事由等）</label><input id="fanNote" type="text" placeholder="選填備註內容..." /></div>
           <div class="input-field">
             <label>選擇人員（按部門分區）：</label>
             <div id="fanMemberChips"></div>
@@ -491,6 +492,7 @@
             <label>事故日期</label>
             <input id="daoSingleDate" type="date" />
           </div>
+          <div class="input-field"><label>備註（例如：事由、檢測地點等）</label><input id="daoNote" type="text" placeholder="選填備註內容..." /></div>
           <div class="input-field">
             <label>選擇當日事故成員（按部門分區）：</label>
             <div id="daoMemberChips"></div>
@@ -582,6 +584,14 @@
   </div>
 
   <script>
+    function getTodayStr() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     function showToast(msg) {
       const toast = document.getElementById('toast');
       if (toast) {
@@ -659,9 +669,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      let currentDate = new Date(2026, 7, 16);
-      let selectedDateStr = '2026-08-16';
-      let guardViewDate = new Date(2026, 7, 16);
+      const todayStr = getTodayStr();
+      let currentDate = new Date();
+      let selectedDateStr = todayStr;
+      let guardViewDate = new Date();
 
       if (localStorage.getItem('polung_darkmode') === '1') {
         document.body.classList.add('dark-mode');
@@ -802,9 +813,9 @@
       });
 
       document.getElementById('todayBtn').addEventListener('click', () => {
-        currentDate = new Date(2026, 7, 16);
-        selectedDateStr = '2026-08-16';
-        guardViewDate = new Date(2026, 7, 16);
+        currentDate = new Date();
+        selectedDateStr = getTodayStr();
+        guardViewDate = new Date();
         renderCalendar();
         renderTaskCalendar();
         renderDayTasks();
@@ -1820,15 +1831,17 @@
         const type = document.getElementById('fanTypeSelect').value;
         const start = document.getElementById('fanStart').value;
         const end = document.getElementById('fanEnd').value;
+        const note = document.getElementById('fanNote').value.trim();
 
         if (!start || !end) return showToast('請選擇開始與結束日期！');
         if (selectedFanMembers.length === 0) return showToast('請至少點選一位人員！');
 
         selectedFanMembers.forEach(memberName => {
-          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start, end });
+          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start, end, note });
         });
 
         selectedFanMembers = [];
+        document.getElementById('fanNote').value = '';
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
         showToast('批次新增成功！');
       });
@@ -1836,15 +1849,17 @@
       document.getElementById('addDaoBtn').addEventListener('click', () => {
         const type = document.getElementById('daoTypeSelect').value;
         const singleDate = document.getElementById('daoSingleDate').value;
+        const note = document.getElementById('daoNote').value.trim();
 
         if (!singleDate) return showToast('請選擇事故日期！');
         if (selectedDaoMembers.length === 0) return showToast('請至少點選一位成員！');
 
         selectedDaoMembers.forEach(memberName => {
-          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start: singleDate, end: singleDate });
+          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start: singleDate, end: singleDate, note });
         });
 
         selectedDaoMembers = [];
+        document.getElementById('daoNote').value = '';
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
         showToast('批次新增事故成功！');
       });
@@ -1884,6 +1899,7 @@
             const card = document.createElement('div');
             card.className = 'task-card';
             card.style.borderLeftColor = rec.type === '返' ? '#3b82f6' : '#8b5cf6';
+            const noteHtml = rec.note ? `<div style="font-size:11px; color:var(--primary); margin-top:2px;">💬 備註：${rec.note}</div>` : '';
             card.innerHTML = `
               <div class="task-header">
                 <span class="task-title">${rec.memberName} (${rec.type === '返' ? '返台' : '受訓'})</span>
@@ -1893,6 +1909,7 @@
                 </div>
               </div>
               <div class="task-desc">${rec.start} 至 ${rec.end}</div>
+              ${noteHtml}
             `;
             fanContainer.appendChild(card);
           });
@@ -1905,6 +1922,7 @@
             const card = document.createElement('div');
             card.className = 'task-card';
             card.style.borderLeftColor = '#f59e0b';
+            const noteHtml = rec.note ? `<div style="font-size:11px; color:#b45309; margin-top:2px;">💬 備註：${rec.note}</div>` : '';
             card.innerHTML = `
               <div class="task-header">
                 <span class="task-title">${rec.memberName} (${rec.type})</span>
@@ -1914,6 +1932,7 @@
                 </div>
               </div>
               <div class="task-desc">日期：${rec.start}</div>
+              ${noteHtml}
             `;
             daoContainer.appendChild(card);
           });
@@ -1929,17 +1948,23 @@
           if (newStart === null) return;
           const newEnd = prompt(`編輯【${rec.memberName}】結束日期 (YYYY-MM-DD)：`, rec.end);
           if (newEnd === null) return;
+          const newNote = prompt(`編輯【${rec.memberName}】備註：`, rec.note || '');
+          if (newNote === null) return;
 
           if (newStart.trim()) rec.start = newStart.trim();
           if (newEnd.trim()) rec.end = newEnd.trim();
+          rec.note = newNote.trim();
         } else {
           const newDate = prompt(`編輯【${rec.memberName}】事故日期 (YYYY-MM-DD)：`, rec.start);
           if (newDate === null) return;
+          const newNote = prompt(`編輯【${rec.memberName}】備註：`, rec.note || '');
+          if (newNote === null) return;
 
           if (newDate.trim()) {
             rec.start = newDate.trim();
             rec.end = newDate.trim();
           }
+          rec.note = newNote.trim();
         }
 
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView();
@@ -1985,7 +2010,7 @@
           const dd = String(d.getDate()).padStart(2, '0');
           const fullDateStr = `${yyyy}-${mm}-${dd}`;
           const displayStr = `${d.getMonth()+1}/${d.getDate()}`;
-          const isToday = (i === 0);
+          const isToday = (fullDateStr === getTodayStr());
 
           dates.push({ full: fullDateStr, display: displayStr, isToday });
           headerRow.innerHTML += `<th class="${isToday ? 'today-col' : ''}">${displayStr}</th>`;
@@ -2138,7 +2163,8 @@
               const dEnd = new Date(r.end);
               const diffDays = Math.ceil(Math.abs(dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
               fanDaysTotal += diffDays;
-              fanRanges.push(`[${r.type}] ${formatDateShort(r.start)} ~ ${formatDateShort(r.end)}`);
+              const noteStr = r.note ? ` (${r.note})` : '';
+              fanRanges.push(`[${r.type}] ${formatDateShort(r.start)} ~ ${formatDateShort(r.end)}${noteStr}`);
             });
 
           const fanDetailsStr = fanRanges.length > 0 ? `${fanDaysTotal} 天 (${fanRanges.join(' / ')})` : '0 天';
@@ -2148,7 +2174,10 @@
             .sort((a, b) => a.start.localeCompare(b.start));
 
           const daoDaysTotal = daoRecords.length;
-          const daoDatesStrList = daoRecords.map(r => `[${r.type}] ${formatDateShort(r.start)}`);
+          const daoDatesStrList = daoRecords.map(r => {
+            const noteStr = r.note ? ` (${r.note})` : '';
+            return `[${r.type}] ${formatDateShort(r.start)}${noteStr}`;
+          });
           const daoDetailsStr = daoDaysTotal > 0 ? `${daoDaysTotal} 天 (${daoDatesStrList.join('、')})` : '0 天';
 
           tbody.innerHTML += `
@@ -2300,12 +2329,15 @@
       document.getElementById('logStart').addEventListener('change', renderLogTasks);
       document.getElementById('logEnd').addEventListener('change', renderLogTasks);
 
-      document.getElementById('guardDate').value = selectedDateStr;
-      document.getElementById('logStart').value = selectedDateStr;
-      document.getElementById('logEnd').value = selectedDateStr;
-      document.getElementById('fanStart').value = selectedDateStr;
-      document.getElementById('fanEnd').value = selectedDateStr;
-      document.getElementById('daoSingleDate').value = selectedDateStr;
+      // 自動初始化所有日期欄位為當天日期
+      document.getElementById('guardDate').value = todayStr;
+      document.getElementById('logStart').value = todayStr;
+      document.getElementById('logEnd').value = todayStr;
+      document.getElementById('fanStart').value = todayStr;
+      document.getElementById('fanEnd').value = todayStr;
+      document.getElementById('daoSingleDate').value = todayStr;
+      document.getElementById('milestoneStart').value = todayStr;
+      document.getElementById('milestoneEnd').value = todayStr;
 
       renderCalendar();
       renderTaskCalendar();
