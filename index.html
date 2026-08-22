@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>任務發佈板 (含 Gear 裝備管理)</title>
+  <title>任務發佈板 (WARNO & 戰力排版優化版)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -63,6 +63,7 @@
     h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text-main); }
     .hint { font-size: 12px; color: var(--text-sub); margin-top: 6px; margin-bottom: 12px; }
 
+    /* 行事曆 */
     .cal-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .cal-label { font-size: 15px; font-weight: 700; }
@@ -76,8 +77,9 @@
     .cal-day.today { background: var(--primary); color: #ffffff; border-color: var(--primary); }
     .cal-day.other-month { opacity: 0.3; cursor: default; }
 
+    /* 任務卡片 */
     .task-list { display: flex; flex-direction: column; gap: 12px; }
-    .task-card { background: var(--card-bg); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; color: var(--text-main); position: relative; }
+    .task-card { background: var(--card-bg); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; color: var(--text-main); }
     .task-header { display: flex; align-items: center; justify-content: space-between; }
     .task-title { font-size: 15px; font-weight: 700; }
     .task-desc { font-size: 12px; color: var(--text-sub); white-space: pre-line; }
@@ -87,6 +89,7 @@
     .task-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border-color); }
     .select-sm { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 12px; background: var(--bg-color); color: var(--text-main); }
 
+    /* 表單與按鈕 */
     .form-group { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .input-field { margin-bottom: 12px; }
     .input-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
@@ -102,6 +105,7 @@
     .btn-danger { background: #fee2e2; color: var(--danger); padding: 6px 10px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; }
     .btn-reset { background: #fee2e2; color: var(--danger); font-size: 12px; padding: 4px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; }
 
+    /* 部門區塊晶片 */
     .dept-block { margin-bottom: 8px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px; }
     .dept-block-header { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
     .assignee-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -128,6 +132,7 @@
     .guard-col { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); }
     .guard-col-title { font-weight: 700; color: var(--primary); margin-bottom: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px; }
 
+    /* 甘特圖表格 */
     .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
     .metric-card { background: var(--card-bg); padding: 12px 8px; border-radius: 12px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
     .metric-val { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; }
@@ -156,6 +161,7 @@
     .badge-jian { background: #ec4899; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
     .badge-ce { background: #10b981; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
 
+    /* 戰力比深色模式相容配色 */
     .cov-good { background: #dcfce7; color: #15803d; font-weight:700; }
     .cov-warn { background: #fef3c7; color: #b45309; font-weight:700; }
     .cov-danger { background: #fee2e2; color: #b91c1c; font-weight:700; }
@@ -173,44 +179,34 @@
 
     .ms-bar { width: 100%; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border-radius: 4px; color: #1e293b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 
-    .warno-card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm); position: relative; }
+    /* WARNO 預令樣式卡片 */
+    .warno-card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm); }
     .warno-section { margin-bottom: 14px; background: var(--bg-color); padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--primary); }
     .warno-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
 
     .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; overflow-x: auto; padding: 8px 0 12px; z-index: 30; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-sub); font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; min-width: 58px; flex-shrink: 0; }
-    .nav-item i { font-size: 17px; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-sub); font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; min-width: 62px; flex-shrink: 0; }
+    .nav-item i { font-size: 18px; }
     .nav-item.active { color: var(--primary); font-weight: 700; }
 
     .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85); color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 100; display: none; }
 
-    .log-checkbox-wrapper { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; z-index: 5; }
-    .log-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-
-    .gear-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 12px; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
-    .gear-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .gear-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; color: #fff; }
-    .gear-tag.single { background: #3b82f6; }
-    .gear-tag.multi { background: #8b5cf6; }
-    .gear-tag.other { background: #10b981; }
-
     @media print {
-      .bottom-nav, .topbar-actions, .btn, .btn-danger, .btn-edit, .order-btn-group, .btn-reset, .log-controls, .log-checkbox-wrapper, .no-print { display: none !important; }
+      .bottom-nav, .topbar-actions, .btn, .btn-danger, .btn-edit, .order-btn-group, .btn-reset { display: none !important; }
       .app-container { height: auto; max-width: 100%; box-shadow: none; }
       main { overflow-y: visible; padding-bottom: 0; }
-      .task-card:not(.selected-for-export), .warno-card:not(.selected-for-export) { display: none !important; }
-      .print-title { display: block !important; font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 12px; }
     }
   </style>
 </head>
 <body>
+
   <div class="app-container">
     <header class="topbar">
       <h1><i class="fa-solid fa-list-check"></i> 任務發佈板</h1>
       <div class="topbar-actions">
         <button id="wakeLockBtn" class="btn-toggle-icon" onclick="toggleWakeLock()"><i class="fa-solid fa-lightbulb"></i> 恆亮</button>
         <button id="darkModeBtn" class="btn-toggle-icon" onclick="toggleDarkMode()"><i class="fa-solid fa-moon"></i> 深色</button>
-        <div id="dateBadge" class="date-badge"></div>
+        <div id="dateBadge" class="date-badge">2026/08/16</div>
       </div>
     </header>
 
@@ -266,7 +262,7 @@
         <div id="deptMemberList"></div>
       </section>
 
-      <!-- Panel 3: 衛哨排班 -->
+      <!-- Panel 3: 衛哨排班 (附帶左右週切換) -->
       <section id="tab-guard" class="panel">
         <h2>
           <span>本週衛哨/安官執勤週曆矩陣 (週一至週日)</span>
@@ -476,7 +472,6 @@
             <div class="input-field" style="flex:1;"><label>開始日期</label><input id="fanStart" type="date" /></div>
             <div class="input-field" style="flex:1;"><label>結束日期</label><input id="fanEnd" type="date" /></div>
           </div>
-          <div class="input-field"><label>備註（例如：班機次、受訓地點、事由等）</label><input id="fanNote" type="text" placeholder="選填備註內容..." /></div>
           <div class="input-field">
             <label>選擇人員（按部門分區）：</label>
             <div id="fanMemberChips"></div>
@@ -499,7 +494,6 @@
             <label>事故日期</label>
             <input id="daoSingleDate" type="date" />
           </div>
-          <div class="input-field"><label>備註（例如：事由、檢測地點等）</label><input id="daoNote" type="text" placeholder="選填備註內容..." /></div>
           <div class="input-field">
             <label>選擇當日事故成員（按部門分區）：</label>
             <div id="daoMemberChips"></div>
@@ -545,88 +539,7 @@
         </div>
       </section>
 
-      <!-- Panel 8: Gear (裝備管理) -->
-      <section id="tab-gear" class="panel">
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-lbl">單人武器數</div>
-            <div class="metric-val" id="singleWeaponCount">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-lbl">多人武器數</div>
-            <div class="metric-val" style="color:#8b5cf6;" id="multiWeaponCount">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-lbl">通信/光電/工兵</div>
-            <div class="metric-val" style="color:#10b981;" id="otherGearCount">0</div>
-          </div>
-        </div>
-
-        <h2>新增建制裝備序號</h2>
-        <div class="form-group no-print">
-          <div class="input-field">
-            <label>裝備類別</label>
-            <select id="gearCatSelect" class="select-sm">
-              <option value="單人武器">1. 單人武器 (T91/65K2/手槍等)</option>
-              <option value="多人武器">2. 多人武器 (81砲/120砲/機槍等)</option>
-              <option value="器材類別">3. 器材類別 (通信/光電/工兵等)</option>
-            </select>
-          </div>
-          <div class="input-field">
-            <label>裝備名稱</label>
-            <input id="gearNameInput" type="text" placeholder="例如：T91步槍、81迫砲、TS93夜視鏡" />
-          </div>
-          <div class="input-field">
-            <label>裝備序號 (Serial No.)</label>
-            <input id="gearSerialInput" type="text" placeholder="例如：112233 或 M81-005" />
-          </div>
-          <button id="addGearBtn" class="btn" style="background:#10b981;"><i class="fa-solid fa-gun"></i> 新增裝備至庫存</button>
-        </div>
-
-        <h2>個人裝備配屬指派區</h2>
-        <div class="form-group no-print">
-          <div class="input-field">
-            <label>選擇成員：</label>
-            <select id="assignMemberSelect" class="select-sm"></select>
-          </div>
-          <div class="input-field">
-            <label>配屬單人武器 (序號)：</label>
-            <select id="assignSingleSelect" class="select-sm"></select>
-          </div>
-          <div class="input-field">
-            <label>配屬多人武器 (序號)：</label>
-            <select id="assignMultiSelect" class="select-sm"></select>
-          </div>
-          <div class="input-field">
-            <label>配屬器材/光電/通信 (序號)：</label>
-            <select id="assignOtherSelect" class="select-sm"></select>
-          </div>
-          <button id="saveMemberGearBtn" class="btn"><i class="fa-solid fa-link"></i> 儲存個人裝備指派</button>
-        </div>
-
-        <h2>
-          <span>全排裝備保管人員名冊</span>
-          <button class="btn btn-ghost no-print" style="width:auto; padding:4px 10px; font-size:12px;" onclick="window.print()"><i class="fa-solid fa-print"></i> 列印名冊</button>
-        </h2>
-        <div class="form-group">
-          <table class="gantt-table" style="width:100%; min-width:auto;">
-            <thead>
-              <tr>
-                <th>部門/姓名</th>
-                <th>單人武器 (序號)</th>
-                <th>多人武器 (序號)</th>
-                <th>器材/光電/通信 (序號)</th>
-              </tr>
-            </thead>
-            <tbody id="memberGearTableBody"></tbody>
-          </table>
-        </div>
-
-        <h2>裝備庫存序號總表</h2>
-        <div id="gearStockList"></div>
-      </section>
-
-      <!-- Panel 9: 日誌 -->
+      <!-- Panel 8: 日誌 -->
       <section id="tab-log" class="panel">
         <h2>任務日誌檢視</h2>
         <div class="form-group">
@@ -639,26 +552,14 @@
         <div id="logTaskList" class="task-list"></div>
 
         <h2 style="margin-top:20px;">日誌輸出與呈核</h2>
-        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
-          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
-          <div style="display:flex; gap:16px;">
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="selectAllLogBtn" checked onchange="toggleAllLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
-            </label>
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="deselectAllLogBtn" onchange="toggleAllLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
-            </label>
-          </div>
-        </div>
-
-        <div class="log-controls" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
           <button class="btn btn-ghost" onclick="exportPrintPDF()"><i class="fa-solid fa-file-pdf"></i> 高解析 PDF / 列印</button>
           <button class="btn btn-ghost" onclick="exportTextSummary()"><i class="fa-solid fa-file-lines"></i> 複製文字摘要 (LINE群)</button>
         </div>
       </section>
     </main>
 
-    <!-- 底欄 Navigation -->
+    <!-- 底欄 Navigation (新增 Warno 預令) -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="date"><i class="fa-solid fa-calendar-days"></i><span>行事曆</span></button>
       <button class="nav-item" data-tab="members"><i class="fa-solid fa-users"></i><span>成員</span></button>
@@ -667,19 +568,11 @@
       <button class="nav-item" data-tab="warno"><i class="fa-solid fa-scroll"></i><span>Warno</span></button>
       <button class="nav-item" data-tab="coverage"><i class="fa-solid fa-chart-line"></i><span>戰力比</span></button>
       <button class="nav-item" data-tab="quarterly"><i class="fa-solid fa-calendar-week"></i><span>季度</span></button>
-      <button class="nav-item" data-tab="gear"><i class="fa-solid fa-gun"></i><span>Gear</span></button>
       <button class="nav-item" data-tab="log"><i class="fa-solid fa-book"></i><span>日誌</span></button>
     </nav>
   </div>
-  <script>
-    function getTodayStr() {
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
-    }
 
+  <script>
     function showToast(msg) {
       const toast = document.getElementById('toast');
       if (toast) {
@@ -724,7 +617,7 @@
       { key: 'guard_08-10', timeLabel: '08:00-10:00 (衛哨)', code: 'h2', group: 'guard', hours: 2, startH: 8, endH: 10 },
       { key: 'guard_10-12', timeLabel: '10:00-12:00 (衛哨)', code: 'h3', group: 'guard', hours: 2, startH: 10, endH: 12 },
       { key: 'guard_12-14', timeLabel: '12:00-14:00 (衛哨)', code: 'h4', group: 'guard', hours: 2, startH: 12, endH: 14 },
-      { key: 'guard_14-16', timeLabel: '16:00-18:00 (衛哨)', code: 'h5', group: 'guard', hours: 2, startH: 14, endH: 16 },
+      { key: 'guard_14-16', timeLabel: '14:00-16:00 (衛哨)', code: 'h5', group: 'guard', hours: 2, startH: 14, endH: 16 },
       { key: 'guard_16-18', timeLabel: '16:00-18:00 (衛哨)', code: 'h6', group: 'guard', hours: 2, startH: 16, endH: 18 },
       { key: 'guard_18-20', timeLabel: '18:00-20:00 (衛哨)', code: 'h7', group: 'guard', hours: 2, startH: 18, endH: 20 },
       { key: 'guard_20-22', timeLabel: '20:00-22:00 (衛哨)', code: 'h8', group: 'guard', hours: 2, startH: 20, endH: 22 }
@@ -756,10 +649,16 @@
       localStorage.setItem('polung_darkmode', isDark ? '1' : '0');
     }
 
+    function getTodayStr(d = new Date()) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      const todayStr = getTodayStr();
       let currentDate = new Date();
-      let selectedDateStr = todayStr;
+      let selectedDateStr = getTodayStr();
       let guardViewDate = new Date();
 
       if (localStorage.getItem('polung_darkmode') === '1') {
@@ -773,8 +672,6 @@
       let leaveRecords = JSON.parse(localStorage.getItem('polung_leaves')) || [];
       let guardAssignments = JSON.parse(localStorage.getItem('polung_guards')) || {};
       let milestones = JSON.parse(localStorage.getItem('polung_milestones')) || [];
-      let gearItems = JSON.parse(localStorage.getItem('polung_gears')) || [];
-      let memberGears = JSON.parse(localStorage.getItem('polung_member_gears')) || {};
 
       let selectedFanMembers = [];
       let selectedDaoMembers = [];
@@ -810,18 +707,16 @@
         localStorage.setItem('polung_leaves', JSON.stringify(leaveRecords));
         localStorage.setItem('polung_guards', JSON.stringify(guardAssignments));
         localStorage.setItem('polung_milestones', JSON.stringify(milestones));
-        localStorage.setItem('polung_gears', JSON.stringify(gearItems));
-        localStorage.setItem('polung_member_gears', JSON.stringify(memberGears));
       }
 
       document.getElementById('resetDataBtn').addEventListener('click', () => {
         if (confirm('確定要清除所有進度與資料並重置歸零嗎？')) {
           localStorage.clear();
-          members = []; tasks = []; warnos = []; leaveRecords = []; guardAssignments = {}; milestones = []; gearItems = []; memberGears = {};
+          members = []; tasks = []; warnos = []; leaveRecords = []; guardAssignments = {}; milestones = [];
           selectedFanMembers = []; selectedDaoMembers = []; filterGanttMembers = []; collapsedDepts = {};
           renderCalendar(); renderTaskCalendar(); renderDayTasks();
           renderMembers(); renderGuardSlots(); renderPublishedGuards(); renderWeeklyGuardSummary(); renderWeeklyMatrix();
-          renderMilestones(); renderGantt(); renderQuarterlyView(); renderLogTasks(); renderWarnos(); renderGearPanel();
+          renderMilestones(); renderGantt(); renderQuarterlyView(); renderLogTasks(); renderWarnos();
           showToast('進度已完全重置歸零！');
         }
       });
@@ -842,173 +737,1527 @@
           if (targetTab === 'warno') { renderWarnos(); }
           if (targetTab === 'coverage') { renderMilestones(); renderGantt(); }
           if (targetTab === 'quarterly') renderQuarterlyView();
-          if (targetTab === 'gear') renderGearPanel();
-          if (targetTab === 'log') renderLogTasks();
         });
       });
-      // GEAR 裝備管理核心邏輯
-      document.getElementById('addGearBtn').addEventListener('click', () => {
-        const cat = document.getElementById('gearCatSelect').value;
-        const name = document.getElementById('gearNameInput').value.trim();
-        const serial = document.getElementById('gearSerialInput').value.trim();
 
-        if (!name || !serial) return showToast('請填寫裝備名稱與序號！');
+      function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
 
-        if (gearItems.some(g => g.serial === serial)) {
-          return showToast('已有相同的裝備序號存在！');
+        document.getElementById('calLabel').textContent = `${year}年 ${month + 1}月`;
+        document.getElementById('dateBadge').textContent = selectedDateStr;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const calGrid = document.getElementById('calGrid');
+        calGrid.innerHTML = '';
+
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'cal-day other-month';
+          calGrid.appendChild(emptyDiv);
         }
 
-        gearItems.push({ id: 'g_' + Date.now(), category: cat, name, serial });
-        document.getElementById('gearNameInput').value = '';
-        document.getElementById('gearSerialInput').value = '';
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'cal-day';
+          dayDiv.textContent = day;
 
-        saveData();
-        renderGearPanel();
-        showToast('裝備庫存已新增！');
-      });
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          if (dateStr === selectedDateStr) dayDiv.classList.add('today');
 
-      function renderGearPanel() {
-        const sCount = gearItems.filter(g => g.category === '單人武器').length;
-        const mCount = gearItems.filter(g => g.category === '多人武器').length;
-        const oCount = gearItems.filter(g => g.category === '器材類別').length;
+          if (tasks.some(t => t.date === dateStr) && dateStr !== selectedDateStr) {
+            dayDiv.classList.add('has-tasks');
+          }
 
-        document.getElementById('singleWeaponCount').textContent = sCount;
-        document.getElementById('multiWeaponCount').textContent = mCount;
-        document.getElementById('otherGearCount').textContent = oCount;
-
-        const memberSelect = document.getElementById('assignMemberSelect');
-        const singleSelect = document.getElementById('assignSingleSelect');
-        const multiSelect = document.getElementById('assignMultiSelect');
-        const otherSelect = document.getElementById('assignOtherSelect');
-
-        memberSelect.innerHTML = '<option value="">-- 請選擇成員 --</option>';
-        singleSelect.innerHTML = '<option value="">-- 未配屬 (無) --</option>';
-        multiSelect.innerHTML = '<option value="">-- 未配屬 (無) --</option>';
-        otherSelect.innerHTML = '<option value="">-- 未配屬 (無) --</option>';
-
-        getSortedMembers().forEach(m => {
-          memberSelect.innerHTML += `<option value="${m.name}">${m.name} (${m.dept} - ${m.role})</option>`;
-        });
-
-        gearItems.filter(g => g.category === '單人武器').forEach(g => {
-          singleSelect.innerHTML += `<option value="${g.serial}">${g.name} [序號:${g.serial}]</option>`;
-        });
-
-        gearItems.filter(g => g.category === '多人武器').forEach(g => {
-          multiSelect.innerHTML += `<option value="${g.serial}">${g.name} [序號:${g.serial}]</option>`;
-        });
-
-        gearItems.filter(g => g.category === '器材類別').forEach(g => {
-          otherSelect.innerHTML += `<option value="${g.serial}">${g.name} [序號:${g.serial}]</option>`;
-        });
-
-        const tbody = document.getElementById('memberGearTableBody');
-        tbody.innerHTML = '';
-
-        const sortedMembers = getSortedMembers();
-        if (sortedMembers.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:12px;">尚無成員資料</td></tr>`;
-        } else {
-          sortedMembers.forEach(m => {
-            const mg = memberGears[m.name] || {};
-            const singleGear = gearItems.find(g => g.serial === mg.single);
-            const multiGear = gearItems.find(g => g.serial === mg.multi);
-            const otherGear = gearItems.find(g => g.serial === mg.other);
-
-            const singleStr = singleGear ? `${singleGear.name} (${singleGear.serial})` : '-';
-            const multiStr = multiGear ? `${multiGear.name} (${multiGear.serial})` : '-';
-            const otherStr = otherGear ? `${otherGear.name} (${otherGear.serial})` : '-';
-
-            tbody.innerHTML += `
-              <tr>
-                <td><b>${m.name}</b> (${m.dept})</td>
-                <td style="font-size:11px;">${singleStr}</td>
-                <td style="font-size:11px;">${multiStr}</td>
-                <td style="font-size:11px;">${otherStr}</td>
-              </tr>
-            `;
+          dayDiv.addEventListener('click', () => {
+            selectedDateStr = dateStr;
+            guardViewDate = new Date(dateStr);
+            renderCalendar();
+            renderTaskCalendar();
+            renderDayTasks();
+            renderGuardSlots();
+            renderPublishedGuards();
+            renderWeeklyMatrix();
+            renderWeeklyGuardSummary();
+            renderGantt();
           });
+
+          calGrid.appendChild(dayDiv);
+        }
+      }
+
+      document.getElementById('prevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+      });
+
+      document.getElementById('nextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+      });
+
+      document.getElementById('todayBtn').addEventListener('click', () => {
+        currentDate = new Date();
+        selectedDateStr = getTodayStr();
+        guardViewDate = new Date();
+        renderCalendar();
+        renderTaskCalendar();
+        renderDayTasks();
+        renderGuardSlots();
+        renderPublishedGuards();
+        renderWeeklyMatrix();
+        renderWeeklyGuardSummary();
+        renderGantt();
+      });
+
+      function renderTaskCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        document.getElementById('taskCalLabel').textContent = `${year}年 ${month + 1}月 (選擇日期發佈)`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const calGrid = document.getElementById('taskCalGrid');
+        calGrid.innerHTML = '';
+
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'cal-day other-month';
+          calGrid.appendChild(emptyDiv);
         }
 
-        const stockList = document.getElementById('gearStockList');
-        stockList.innerHTML = '';
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'cal-day';
+          dayDiv.textContent = day;
 
-        if (gearItems.length === 0) {
-          stockList.innerHTML = `<p class="hint" style="text-align:center;">庫存內尚無裝備序號。</p>`;
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          if (dateStr === selectedDateStr) dayDiv.classList.add('today');
+
+          if (tasks.some(t => t.date === dateStr) && dateStr !== selectedDateStr) {
+            dayDiv.classList.add('has-tasks');
+          }
+
+          dayDiv.addEventListener('click', () => {
+            selectedDateStr = dateStr;
+            renderCalendar();
+            renderTaskCalendar();
+            renderDayTasks();
+          });
+
+          calGrid.appendChild(dayDiv);
+        }
+      }
+
+      document.getElementById('taskPrevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderTaskCalendar();
+      });
+
+      document.getElementById('taskNextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderTaskCalendar();
+      });
+
+      function renderDayTasks() {
+        const container = document.getElementById('dayTaskList');
+        const pubContainer = document.getElementById('publishedTaskList');
+        container.innerHTML = '';
+        pubContainer.innerHTML = '';
+
+        const dayTasks = tasks.filter(t => t.date === selectedDateStr);
+
+        if (dayTasks.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">今日無發佈內容。</p>`;
+          pubContainer.innerHTML = `<p class="hint" style="text-align:center;">該日尚無發佈內容。</p>`;
           return;
         }
 
-        gearItems.forEach(g => {
-          let holderName = '無 (在庫)';
-          Object.keys(memberGears).forEach(mName => {
-            const mg = memberGears[mName];
-            if (mg.single === g.serial || mg.multi === g.serial || mg.other === g.serial) {
-              holderName = mName;
-            }
+        dayTasks.forEach(task => {
+          const card = document.createElement('div');
+          card.className = `task-card`;
+          card.style.borderLeftColor = task.color || '#3b82f6';
+
+          let memberOptions = `<option value="未指定">未指定檢核人</option>`;
+          getSortedMembers().forEach(m => {
+            memberOptions += `<option value="${m.name}" ${task.checker === m.name ? 'selected' : ''}>${m.name}</option>`;
           });
 
-          let tagClass = 'single';
-          if (g.category === '多人武器') tagClass = 'multi';
-          if (g.category === '器材類別') tagClass = 'other';
+          let assigneeChipsSection = '';
+          if (!task.isGuardTask) {
+            let deptBlocksHtml = '';
+            if (members.length === 0) {
+              deptBlocksHtml = `<span style="font-size:11px; color:var(--text-sub);">尚未匯入成員</span>`;
+            } else {
+              deptOrder.forEach(dName => {
+                const deptM = members.filter(m => m.dept === dName);
+                if (deptM.length > 0) {
+                  let chips = '';
+                  deptM.forEach(m => {
+                    const isAssigned = (task.assignees || []).includes(m.name);
+                    chips += `
+                      <button type="button" class="chip-btn ${isAssigned ? 'active' : ''}" onclick="toggleTaskAssignee('${task.id}', '${m.name}')">
+                        ${m.name}
+                      </button>
+                    `;
+                  });
 
-          const card = document.createElement('div');
-          card.className = 'gear-card';
+                  deptBlocksHtml += `
+                    <div class="dept-block">
+                      <div class="dept-block-header">
+                        <span>${dName}</span>
+                        <button type="button" class="btn-toggle-icon" style="padding:2px 6px; font-size:10px;" onclick="batchToggleTaskDept('${task.id}', '${dName}')">全選/全撤</button>
+                      </div>
+                      <div class="assignee-chips">${chips}</div>
+                    </div>
+                  `;
+                }
+              });
+            }
+
+            assigneeChipsSection = `
+              <div>
+                <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">按部門分派成員參與：</div>
+                <div>${deptBlocksHtml}</div>
+              </div>
+            `;
+          }
+
+          const coordHtml = task.coord ? `<div style="font-size:11px; color:var(--primary); font-weight:700; background:var(--primary-light); padding:4px 8px; border-radius:6px; margin-top:2px;">📌 協調事項：${task.coord}</div>` : '';
+
           card.innerHTML = `
-            <div class="gear-header">
-              <span class="gear-tag ${tagClass}">${g.category}</span>
-              <button class="btn-danger" style="padding:2px 6px;" onclick="deleteGear('${g.id}')"><i class="fa-solid fa-trash"></i></button>
+            <div class="task-header">
+              <span class="task-title">${task.title}</span>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <span class="type-badge" style="background:${task.color || '#3b82f6'};">${task.catName || '任務'}</span>
+                ${task.isGuardTask ? `<button class="btn-edit" onclick="editGuardTask('${task.date}')"><i class="fa-solid fa-pen"></i> 編輯</button>` : ''}
+                <button class="btn-danger" onclick="deleteTask('${task.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
             </div>
-            <div style="font-size:14px; font-weight:700;">${g.name}</div>
-            <div style="font-size:12px; color:var(--primary); font-weight:700; margin-top:2px;">序號：${g.serial}</div>
-            <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">保管人：<b>${holderName}</b></div>
+            <div class="task-desc">${task.desc || '無詳細說明'}</div>
+            ${coordHtml}
+            <div style="font-size:11px; font-weight:700; color:var(--primary);">
+              <i class="fa-regular fa-clock"></i> 預計時間：${task.duration || 120} 分鐘
+            </div>
+            ${assigneeChipsSection}
+            <div class="task-controls">
+              <div>
+                <label style="font-size:11px;">狀態：</label>
+                <select class="select-sm" onchange="updateTaskStatus('${task.id}', this.value)">
+                  <option value="待執行" ${task.status === '待執行' ? 'selected' : ''}>待執行</option>
+                  <option value="進行中" ${task.status === '進行中' ? 'selected' : ''}>進行中</option>
+                  <option value="已完成" ${task.status === '已完成' ? 'selected' : ''}>已完成</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;">檢核人：</label>
+                <select class="select-sm" onchange="updateTaskChecker('${task.id}', this.value)">
+                  ${memberOptions}
+                </select>
+              </div>
+            </div>
           `;
-          stockList.appendChild(card);
+
+          container.appendChild(card);
+          pubContainer.appendChild(card.cloneNode(true));
         });
       }
 
-      document.getElementById('assignMemberSelect').addEventListener('change', (e) => {
-        const name = e.target.value;
-        if (!name) return;
-        const mg = memberGears[name] || {};
-        document.getElementById('assignSingleSelect').value = mg.single || '';
-        document.getElementById('assignMultiSelect').value = mg.multi || '';
-        document.getElementById('assignOtherSelect').value = mg.other || '';
-      });
-
-      document.getElementById('saveMemberGearBtn').addEventListener('click', () => {
-        const memberName = document.getElementById('assignMemberSelect').value;
-        if (!memberName) return showToast('請先選擇成員！');
-
-        const single = document.getElementById('assignSingleSelect').value;
-        const multi = document.getElementById('assignMultiSelect').value;
-        const other = document.getElementById('assignOtherSelect').value;
-
-        memberGears[memberName] = { single, multi, other };
-        saveData();
-        renderGearPanel();
-        showToast(`已儲存 ${memberName} 的配屬裝備！`);
-      });
-
-      window.deleteGear = function(id) {
-        const g = gearItems.find(x => x.id === id);
-        if (g) {
-          Object.keys(memberGears).forEach(mName => {
-            if (memberGears[mName].single === g.serial) memberGears[mName].single = '';
-            if (memberGears[mName].multi === g.serial) memberGears[mName].multi = '';
-            if (memberGears[mName].other === g.serial) memberGears[mName].other = '';
-          });
+      window.toggleTaskAssignee = function(taskId, memberName) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          if (!task.assignees) task.assignees = [];
+          const index = task.assignees.indexOf(memberName);
+          if (index > -1) task.assignees.splice(index, 1);
+          else task.assignees.push(memberName);
+          saveData(); renderDayTasks(); renderLogTasks();
         }
-        gearItems = gearItems.filter(x => x.id !== id);
-        saveData();
-        renderGearPanel();
-        showToast('已刪除該裝備');
       };
 
-      document.getElementById('guardDate').value = todayStr;
-      document.getElementById('logStart').value = todayStr;
-      document.getElementById('logEnd').value = todayStr;
+      window.batchToggleTaskDept = function(taskId, deptName) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          if (!task.assignees) task.assignees = [];
+          const deptMembers = members.filter(m => m.dept === deptName).map(m => m.name);
+          const allIncluded = deptMembers.every(name => task.assignees.includes(name));
 
-      renderGearPanel();
+          if (allIncluded) {
+            task.assignees = task.assignees.filter(name => !deptMembers.includes(name));
+          } else {
+            deptMembers.forEach(name => {
+              if (!task.assignees.includes(name)) task.assignees.push(name);
+            });
+          }
+          saveData(); renderDayTasks(); renderLogTasks();
+        }
+      };
+
+      window.deleteTask = function(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards();
+        showToast('已刪除');
+      };
+
+      window.updateTaskStatus = function(id, val) {
+        const t = tasks.find(x => x.id === id);
+        if (t) { t.status = val; saveData(); }
+      };
+
+      window.updateTaskChecker = function(id, val) {
+        const t = tasks.find(x => x.id === id);
+        if (t) { t.checker = val; saveData(); }
+      };
+
+      function renderMembers() {
+        const container = document.getElementById('deptMemberList');
+        const totalHeader = document.getElementById('totalMemberCountHeader');
+        const deptDatalist = document.getElementById('deptDatalist');
+        const roleDatalist = document.getElementById('roleDatalist');
+
+        container.innerHTML = '';
+        deptDatalist.innerHTML = '';
+        roleDatalist.innerHTML = '';
+
+        totalHeader.textContent = `(現有總人數：${members.length} 人)`;
+
+        if (members.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">目前無成員資料。</p>`;
+          return;
+        }
+
+        const depts = {};
+        const uniqueRoles = new Set();
+
+        members.forEach(m => {
+          if (!depts[m.dept]) depts[m.dept] = [];
+          depts[m.dept].push(m);
+          if (m.role) uniqueRoles.add(m.role);
+        });
+
+        deptOrder.forEach(d => {
+          const opt = document.createElement('option'); opt.value = d;
+          deptDatalist.appendChild(opt);
+        });
+
+        uniqueRoles.forEach(r => {
+          const opt = document.createElement('option'); opt.value = r;
+          roleDatalist.appendChild(opt);
+        });
+
+        deptOrder.forEach(deptName => {
+          if (!depts[deptName]) return;
+
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'dept-group';
+
+          const isCollapsed = collapsedDepts[deptName] || false;
+
+          const header = document.createElement('div');
+          header.className = 'dept-title';
+          header.innerHTML = `
+            <span><i class="fa-solid fa-folder-open"></i> ${deptName} (${depts[deptName].length} 人)</span>
+            <i class="fa-solid ${isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
+          `;
+
+          header.onclick = () => {
+            collapsedDepts[deptName] = !collapsedDepts[deptName];
+            renderMembers();
+          };
+
+          groupDiv.appendChild(header);
+
+          if (!isCollapsed) {
+            const ul = document.createElement('ul');
+            ul.className = 'member-list';
+
+            depts[deptName].forEach(m => {
+              const li = document.createElement('li');
+              li.className = 'member-item';
+              li.innerHTML = `
+                <div>
+                  <span style="font-weight:700;">${m.name}</span>
+                  <span style="font-size:11px; color:var(--text-sub); margin-left:6px;">${m.role}</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn-edit" onclick="editMember('${m.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                  <button class="btn-danger" onclick="removeMember('${m.id}')"><i class="fa-solid fa-user-minus"></i> 刪除</button>
+                </div>
+              `;
+              ul.appendChild(li);
+            });
+
+            groupDiv.appendChild(ul);
+          }
+
+          container.appendChild(groupDiv);
+        });
+      }
+
+      document.getElementById('addMemberBtn').addEventListener('click', () => {
+        const name = document.getElementById('name').value.trim();
+        const dept = document.getElementById('dept').value.trim() || '排部';
+        const role = document.getElementById('role').value.trim() || '成員';
+
+        if (!name) return showToast('請填寫姓名！');
+
+        members.push({ id: Date.now().toString(), name, dept, role });
+        document.getElementById('name').value = '';
+        saveData(); renderMembers(); renderDayTasks(); renderGuardSlots(); renderWeeklyGuardSummary(); renderWeeklyMatrix(); renderGantt();
+        showToast('成員新增成功！');
+      });
+
+      window.editMember = function(id) {
+        const m = members.find(x => x.id === id);
+        if (!m) return;
+
+        const newName = prompt('修改成員姓名：', m.name);
+        if (newName === null) return;
+        const newDept = prompt('修改部門：', m.dept);
+        if (newDept === null) return;
+        const newRole = prompt('修改職稱：', m.role);
+        if (newRole === null) return;
+
+        m.name = newName.trim() || m.name;
+        m.dept = newDept.trim() || m.dept;
+        m.role = newRole.trim() || m.role;
+
+        saveData(); renderMembers(); renderDayTasks(); renderGuardSlots(); renderWeeklyGuardSummary(); renderWeeklyMatrix(); renderGantt();
+        showToast('成員資訊已更新！');
+      };
+
+      window.removeMember = function(id) {
+        members = members.filter(m => m.id !== id);
+        saveData(); renderMembers(); renderDayTasks(); renderGuardSlots(); renderWeeklyGuardSummary(); renderWeeklyMatrix(); renderGantt();
+      };
+
+      window.changeGuardWeek = function(offset) {
+        guardViewDate.setDate(guardViewDate.getDate() + (offset * 7));
+        renderWeeklyMatrix();
+        renderWeeklyGuardSummary();
+      };
+
+      document.getElementById('modeGuardBtn').addEventListener('click', () => {
+        guardMode = 'guard';
+        document.getElementById('modeGuardBtn').classList.add('active');
+        document.getElementById('modeSafeBtn').classList.remove('active');
+        renderGuardSlots();
+      });
+
+      document.getElementById('modeSafeBtn').addEventListener('click', () => {
+        guardMode = 'safe';
+        document.getElementById('modeSafeBtn').classList.add('active');
+        document.getElementById('modeGuardBtn').classList.remove('active');
+        renderGuardSlots();
+      });
+
+      document.getElementById('guardDate').addEventListener('change', (e) => {
+        if (e.target.value) {
+          selectedDateStr = e.target.value;
+          guardViewDate = new Date(e.target.value);
+          renderCalendar(); renderTaskCalendar(); renderGuardSlots(); renderPublishedGuards(); renderWeeklyMatrix(); renderWeeklyGuardSummary();
+        }
+      });
+
+      function renderGuardSlots() {
+        const container = document.getElementById('guardSlots');
+        container.innerHTML = '';
+
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        if (!guardAssignments[dateVal]) guardAssignments[dateVal] = {};
+
+        const activeShifts = shiftDefinitions.filter(s => s.group === guardMode);
+        const sortedMemberList = getSortedMembers();
+
+        activeShifts.forEach(shiftObj => {
+          const slot = document.createElement('div');
+          slot.className = 'guard-slot-card';
+
+          const currentAssigned = guardAssignments[dateVal][shiftObj.key] || '';
+
+          let optionsHtml = `<option value="">-- 請選擇人員 --</option>`;
+          sortedMemberList.forEach(m => {
+            const isOff = leaveRecords.some(r => r.memberName === m.name && dateVal >= r.start && dateVal <= r.end);
+            const labelStr = isOff ? `${m.name} (${m.dept}) [休假中]` : `${m.name} (${m.dept})`;
+            optionsHtml += `<option value="${m.name}" ${currentAssigned === m.name ? 'selected' : ''}>${labelStr}</option>`;
+          });
+
+          slot.innerHTML = `
+            <span style="font-size:12px; font-weight:700; color:var(--primary);">${shiftObj.timeLabel.replace(' (安官)', '').replace(' (衛哨)', '')}</span>
+            <div style="flex:1; max-width:190px; margin-left:12px;">
+              <select class="select-sm" style="width:100%;" onchange="assignGuardSlotWithValidation('${dateVal}', '${shiftObj.key}', this)">
+                ${optionsHtml}
+              </select>
+            </div>
+          `;
+
+          container.appendChild(slot);
+        });
+      }
+
+      window.assignGuardSlotWithValidation = function(date, shiftKey, selectElem) {
+        const memberName = selectElem.value;
+        const targetShift = shiftDefinitions.find(s => s.key === shiftKey);
+
+        if (memberName && targetShift) {
+          const isOff = leaveRecords.some(r => r.memberName === memberName && date >= r.start && date <= r.end);
+          if (isOff) showToast(`提醒：${memberName} 在該日有休假紀錄！`);
+
+          const targetDateObj = new Date(date);
+          const targetStartMin = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate(), targetShift.startH).getTime();
+          const targetEndMin = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate(), targetShift.endH).getTime();
+
+          let violation = false;
+
+          for (let dayOffset = -1; dayOffset <= 1; dayOffset++) {
+            const checkD = new Date(targetDateObj);
+            checkD.setDate(targetDateObj.getDate() + dayOffset);
+            const checkDStr = `${checkD.getFullYear()}-${String(checkD.getMonth() + 1).padStart(2, '0')}-${String(checkD.getDate()).padStart(2, '0')}`;
+
+            const dayData = guardAssignments[checkDStr] || {};
+            shiftDefinitions.forEach(def => {
+              if (checkDStr === date && def.key === shiftKey) return;
+
+              if (dayData[def.key] === memberName) {
+                const existStart = new Date(checkD.getFullYear(), checkD.getMonth(), checkD.getDate(), def.startH).getTime();
+                const existEnd = new Date(checkD.getFullYear(), checkD.getMonth(), checkD.getDate(), def.endH).getTime();
+
+                let restHours = 999;
+                if (targetStartMin >= existEnd) {
+                  restHours = (targetStartMin - existEnd) / (1000 * 60 * 60);
+                } else if (existStart >= targetEndMin) {
+                  restHours = (existStart - targetEndMin) / (1000 * 60 * 60);
+                } else {
+                  restHours = 0;
+                }
+
+                if (restHours < 6) violation = true;
+              }
+            });
+          }
+
+          if (violation) {
+            const confirmAssign = confirm(`⚠️ 警告：【${memberName}】未符合「站兩歇六」規定（班次間隔未滿 6 小時）！\n\n您確定還是要強制排班嗎？`);
+            if (!confirmAssign) {
+              selectElem.value = guardAssignments[date][shiftKey] || '';
+              return;
+            }
+          }
+
+          if (!guardAssignments[date]) guardAssignments[date] = {};
+          guardAssignments[date][shiftKey] = memberName;
+        } else {
+          if (guardAssignments[date]) delete guardAssignments[date][shiftKey];
+        }
+
+        saveData();
+        renderWeeklyMatrix();
+        renderWeeklyGuardSummary();
+      };
+
+      function getWeekDates(baseDateObj) {
+        const targetDate = new Date(baseDateObj);
+        const dayOfWeek = targetDate.getDay();
+        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+        const monday = new Date(targetDate);
+        monday.setDate(targetDate.getDate() + diffToMonday);
+
+        const weekDates = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const displayStr = `${d.getMonth()+1}/${d.getDate()}`;
+          weekDates.push({ full: `${yyyy}-${mm}-${dd}`, display: displayStr });
+        }
+        return weekDates;
+      }
+
+      function renderWeeklyMatrix() {
+        const headerRow = document.getElementById('weeklyMatrixHeader');
+        const tbody = document.getElementById('weeklyMatrixBody');
+
+        headerRow.innerHTML = '<th>班次 / 日期</th>';
+        tbody.innerHTML = '';
+
+        const weekDates = getWeekDates(guardViewDate);
+        weekDates.forEach(w => {
+          headerRow.innerHTML += `<th>${w.display}</th>`;
+        });
+
+        shiftDefinitions.forEach(def => {
+          const tr = document.createElement('tr');
+          const lbl = def.group === 'safe' ? `[安官] ${def.code}` : `[衛哨] ${def.code}`;
+          tr.innerHTML = `<td style="font-weight:700; background:var(--primary-light); color:var(--primary);">${lbl}</td>`;
+
+          weekDates.forEach(w => {
+            const assigned = (guardAssignments[w.full] || {})[def.key] || '-';
+            const isSelectedDay = (w.full === selectedDateStr);
+            tr.innerHTML += `<td style="${isSelectedDay ? 'background:var(--primary-light); font-weight:700;' : ''}">${assigned}</td>`;
+          });
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderWeeklyGuardSummary() {
+        const tbody = document.getElementById('weeklyGuardSummaryBody');
+        tbody.innerHTML = '';
+
+        const weekDates = getWeekDates(guardViewDate);
+        const stats = {};
+        members.forEach(m => {
+          stats[m.name] = { safeHours: 0, guardHours: 0, dept: m.dept };
+        });
+
+        weekDates.forEach(wObj => {
+          const dayData = guardAssignments[wObj.full] || {};
+          shiftDefinitions.forEach(def => {
+            const assignedName = dayData[def.key];
+            if (assignedName && stats[assignedName]) {
+              if (def.group === 'safe') {
+                stats[assignedName].safeHours += def.hours;
+              } else if (def.group === 'guard') {
+                stats[assignedName].guardHours += def.hours;
+              }
+            }
+          });
+        });
+
+        const sortedList = getSortedMembers();
+
+        if (sortedList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:10px;">尚無成員資料</td></tr>`;
+          return;
+        }
+
+        sortedList.forEach(m => {
+          const s = stats[m.name] || { safeHours: 0, guardHours: 0 };
+          const total = s.safeHours + s.guardHours;
+          tbody.innerHTML += `
+            <tr>
+              <td><b>${m.name}</b> (${m.dept})</td>
+              <td style="color:var(--primary); font-weight:700;">${s.safeHours} 小時</td>
+              <td style="color:#f97316; font-weight:700;">${s.guardHours} 小時</td>
+              <td style="font-weight:700;">${total} 小時</td>
+            </tr>
+          `;
+        });
+      }
+
+      document.getElementById('publishGuardTaskBtn').addEventListener('click', () => {
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        const currentData = guardAssignments[dateVal] || {};
+
+        const validAssignedNames = [];
+        const cleanedGuardData = {};
+
+        shiftDefinitions.forEach(def => {
+          if (currentData[def.key]) {
+            validAssignedNames.push(currentData[def.key]);
+            cleanedGuardData[def.key] = currentData[def.key];
+          }
+        });
+
+        if (validAssignedNames.length === 0) return showToast('尚未指派人員！');
+
+        guardAssignments[dateVal] = cleanedGuardData;
+        const uniqueAssignees = [...new Set(validAssignedNames)];
+
+        let safeRows = '';
+        let guardRows = '';
+
+        shiftDefinitions.forEach(def => {
+          const name = cleanedGuardData[def.key];
+          if (name) {
+            if (def.group === 'safe') {
+              safeRows += `<div><b>${def.code}</b> : ${name}</div>`;
+            } else if (def.group === 'guard') {
+              guardRows += `<div><b>${def.code}</b> : ${name}</div>`;
+            }
+          }
+        });
+
+        let summaryHtml = `
+          <div class="guard-grid-layout">
+            <div class="guard-col">
+              <div class="guard-col-title">【安官勤務】</div>
+              ${safeRows || '<div style="color:var(--text-sub);">無</div>'}
+            </div>
+            <div class="guard-col">
+              <div class="guard-col-title">【衛哨勤務】</div>
+              ${guardRows || '<div style="color:var(--text-sub);">無</div>'}
+            </div>
+          </div>
+        `;
+
+        const existingIdx = tasks.findIndex(t => t.date === dateVal && t.isGuardTask);
+        const taskPayload = {
+          id: existingIdx > -1 ? tasks[existingIdx].id : Date.now().toString(),
+          title: '衛哨表',
+          desc: summaryHtml,
+          coord: '',
+          date: dateVal,
+          duration: 120,
+          color: '#f97316',
+          catName: '衛哨勤務',
+          status: '待執行',
+          checker: '未指定',
+          isGuardTask: true,
+          assignees: uniqueAssignees
+        };
+
+        if (existingIdx > -1) tasks[existingIdx] = taskPayload;
+        else tasks.push(taskPayload);
+
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards(); renderWeeklyMatrix(); renderWeeklyGuardSummary();
+        showToast('衛哨表發佈/更新成功！');
+      });
+
+      function renderPublishedGuards() {
+        const container = document.getElementById('publishedGuardList');
+        container.innerHTML = '';
+
+        const dateVal = document.getElementById('guardDate').value || selectedDateStr;
+        const guardTasks = tasks.filter(t => t.date === dateVal && t.isGuardTask);
+
+        if (guardTasks.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">當日尚無衛哨表紀錄。</p>`;
+          return;
+        }
+
+        guardTasks.forEach(gt => {
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.style.borderLeftColor = '#f97316';
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="task-title"><i class="fa-solid fa-shield-halved"></i> 衛哨表 (${gt.date})</span>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-edit" onclick="editGuardTask('${gt.date}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                <button class="btn-danger" onclick="deleteTask('${gt.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
+            </div>
+            <div class="task-desc">${gt.desc}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.editGuardTask = function(targetDate) {
+        selectedDateStr = targetDate;
+        guardViewDate = new Date(targetDate);
+        document.getElementById('guardDate').value = targetDate;
+
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-tab="guard"]').classList.add('active');
+        document.getElementById('tab-guard').classList.add('active');
+
+        renderGuardSlots();
+        renderPublishedGuards();
+        renderWeeklyMatrix();
+        renderWeeklyGuardSummary();
+        showToast(`已載入 ${targetDate} 哨表，修改後點擊發佈即可更新！`);
+      };
+
+      document.getElementById('publishWarnoBtn').addEventListener('click', () => {
+        const title = document.getElementById('warnoTitle').value.trim();
+        const sit = document.getElementById('warnoSit').value.trim();
+        const mis = document.getElementById('warnoMis').value.trim();
+        const exe = document.getElementById('warnoExe').value.trim();
+        const ass = document.getElementById('warnoAss').value.trim();
+        const con = document.getElementById('warnoCon').value.trim();
+
+        if (!title) return showToast('請填寫預令名稱！');
+
+        warnos.unshift({
+          id: 'warno_' + Date.now(),
+          date: selectedDateStr,
+          title, sit, mis, exe, ass, con
+        });
+
+        document.getElementById('warnoTitle').value = '';
+        document.getElementById('warnoSit').value = '';
+        document.getElementById('warnoMis').value = '';
+        document.getElementById('warnoExe').value = '';
+        document.getElementById('warnoAss').value = '';
+        document.getElementById('warnoCon').value = '';
+
+        saveData();
+        renderWarnos();
+        showToast('WARNO 預備命令發佈成功！');
+      });
+
+      function renderWarnos() {
+        const container = document.getElementById('warnoList');
+        container.innerHTML = '';
+
+        if (warnos.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">尚無發佈之 WARNO 預備命令。</p>`;
+          return;
+        }
+
+        warnos.forEach(w => {
+          const card = document.createElement('div');
+          card.className = 'warno-card';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+              <span style="font-size:16px; font-weight:700; color:#8b5cf6;"><i class="fa-solid fa-scroll"></i> ${w.title}</span>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span style="font-size:11px; color:var(--text-sub);">${w.date}</span>
+                <button class="btn-danger" style="padding:2px 6px;" onclick="deleteWarno('${w.id}')"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+
+            <div class="warno-section">
+              <div class="warno-title">1. 狀況 (Situation)</div>
+              <div class="task-desc">${w.sit || '無'}</div>
+            </div>
+
+            <div class="warno-section">
+              <div class="warno-title">2. 任務 (Mission)</div>
+              <div class="task-desc">${w.mis || '無'}</div>
+            </div>
+
+            <div class="warno-section">
+              <div class="warno-title">3. 執行 (Execution)</div>
+              <div class="task-desc">${w.exe || '無'}</div>
+            </div>
+
+            <div class="warno-section">
+              <div class="warno-title">4. 假定事項 (Assumptions)</div>
+              <div class="task-desc">${w.ass || '無'}</div>
+            </div>
+
+            <div class="warno-section">
+              <div class="warno-title">5. 應變措施 (Contingencies)</div>
+              <div class="task-desc">${w.con || '無'}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.deleteWarno = function(id) {
+        warnos = warnos.filter(w => w.id !== id);
+        saveData();
+        renderWarnos();
+        showToast('已刪除預令');
+      };
+
+      window.toggleTaskCatCollapse = function() {
+        leaveCollapsed.taskCat = !leaveCollapsed.taskCat;
+        const content = document.getElementById('taskCatCollapseContent');
+        const arrow = document.getElementById('taskCatCollapseArrow');
+
+        content.style.display = leaveCollapsed.taskCat ? 'none' : 'flex';
+        arrow.className = leaveCollapsed.taskCat ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+      };
+
+      function renderColorPicker() {
+        const grid = document.getElementById('colorPickerGrid');
+        grid.innerHTML = '';
+
+        distinct30Colors.forEach(c => {
+          const box = document.createElement('div');
+          box.className = 'color-box';
+          box.style.backgroundColor = c;
+          if (c === selectedColor) box.classList.add('selected');
+
+          box.addEventListener('click', () => {
+            document.querySelectorAll('.color-box').forEach(b => b.classList.remove('selected'));
+            box.classList.add('selected');
+            selectedColor = c;
+          });
+
+          grid.appendChild(box);
+        });
+      }
+
+      function renderCatSelectAndList() {
+        const select = document.getElementById('taskCatSelect');
+        const list = document.getElementById('catManageList');
+        select.innerHTML = ''; list.innerHTML = '';
+
+        customCategories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat.id; opt.textContent = cat.name;
+          select.appendChild(opt);
+
+          const item = document.createElement('div');
+          item.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background:var(--bg-color); padding:6px 10px; border-radius:8px; margin-bottom:4px; border:1px solid var(--border-color);';
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:14px; height:14px; border-radius:4px; background:${cat.color};"></div>
+              <span style="font-size:12px; font-weight:700;">${cat.name}</span>
+            </div>
+            <button class="btn-danger" onclick="removeCategory('${cat.id}')"><i class="fa-solid fa-xmark"></i></button>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      document.getElementById('addCatBtn').addEventListener('click', () => {
+        const name = document.getElementById('newCatName').value.trim();
+        if (!name) return showToast('請輸入類型名稱！');
+
+        customCategories.push({ id: `cat-${Date.now()}`, name, color: selectedColor });
+        document.getElementById('newCatName').value = '';
+        renderCatSelectAndList();
+        showToast('新類型已建立');
+      });
+
+      window.removeCategory = function(id) {
+        customCategories = customCategories.filter(c => c.id !== id);
+        renderCatSelectAndList();
+      };
+
+      document.getElementById('decDuration').addEventListener('click', () => {
+        if (estimatedDuration > 15) {
+          estimatedDuration -= 15;
+          document.getElementById('durationDisplay').textContent = `${estimatedDuration} 分鐘`;
+        }
+      });
+
+      document.getElementById('incDuration').addEventListener('click', () => {
+        estimatedDuration += 15;
+        document.getElementById('durationDisplay').textContent = `${estimatedDuration} 分鐘`;
+      });
+
+      document.getElementById('publishTaskBtn').addEventListener('click', () => {
+        const title = document.getElementById('taskTitle').value.trim();
+        const desc = document.getElementById('taskDesc').value.trim();
+        const coord = document.getElementById('taskCoord').value.trim();
+        const date = selectedDateStr;
+        const catId = document.getElementById('taskCatSelect').value;
+
+        const catObj = customCategories.find(c => c.id === catId) || { name: '一般任務', color: '#3b82f6' };
+
+        if (!title) return showToast('請輸入任務名稱！');
+
+        tasks.push({
+          id: Date.now().toString(),
+          title, desc, coord, date,
+          duration: estimatedDuration,
+          color: catObj.color,
+          catName: catObj.name,
+          status: '待執行',
+          checker: '未指定',
+          assignees: []
+        });
+
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDesc').value = '';
+        document.getElementById('taskCoord').value = '';
+
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks();
+        showToast('發佈成功！');
+      });
+
+      document.getElementById('addMilestoneBtn').addEventListener('click', () => {
+        const cat = document.getElementById('milestoneCatSelect').value;
+        const start = document.getElementById('milestoneStart').value;
+        const end = document.getElementById('milestoneEnd').value;
+
+        if (!start || !end) return showToast('請選擇管制行程起訖日期！');
+        if (start > end) return showToast('開始日期不得晚於結束日期！');
+
+        milestones.push({ id: 'ms_' + Date.now() + '_' + Math.floor(Math.random()*1000), category: cat, start, end });
+        saveData();
+        renderMilestones();
+        renderGantt();
+        showToast(`已新增重大行程：${cat}`);
+      });
+
+      function renderMilestones() {
+        const container = document.getElementById('milestoneListContainer');
+        container.innerHTML = '';
+
+        if (milestones.length === 0) {
+          container.innerHTML = `<span class="hint" style="margin:0;">尚未新增管制行程。</span>`;
+          return;
+        }
+
+        milestones.forEach(ms => {
+          const bg = milestoneColorMap[ms.category] || 'rgba(59, 130, 246, 0.4)';
+          const item = document.createElement('div');
+          item.style.cssText = `display:flex; align-items:center; justify-content:space-between; background:${bg}; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; color:#1e293b;`;
+          item.innerHTML = `
+            <span>📌 ${ms.category} (${ms.start} ~ ${ms.end})</span>
+            <button class="btn-danger" style="padding:2px 8px;" onclick="removeMilestone('${ms.id}')"><i class="fa-solid fa-xmark"></i></button>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      window.removeMilestone = function(id) {
+        milestones = milestones.filter(m => m.id !== id);
+        saveData(); renderMilestones(); renderGantt();
+        showToast('已刪除管制行程');
+      };
+
+      function renderMemberBatchChips() {
+        const fanContainer = document.getElementById('fanMemberChips');
+        const daoContainer = document.getElementById('daoMemberChips');
+        const filterContainer = document.getElementById('ganttFilterChips');
+
+        fanContainer.innerHTML = ''; daoContainer.innerHTML = ''; filterContainer.innerHTML = '';
+
+        if (members.length === 0) {
+          fanContainer.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">無成員</span>`;
+          daoContainer.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">無成員</span>`;
+          filterContainer.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">無成員</span>`;
+          return;
+        }
+
+        deptOrder.forEach(dName => {
+          const deptMembers = members.filter(m => m.dept === dName);
+          if (deptMembers.length > 0) {
+            let filterChips = '';
+            deptMembers.forEach(m => {
+              const isSel = filterGanttMembers.includes(m.name);
+              filterChips += `
+                <button type="button" class="chip-btn ${isSel ? 'active' : ''}" onclick="toggleGanttFilter('${m.name}')">
+                  ${m.name}
+                </button>
+              `;
+            });
+            filterContainer.innerHTML += `
+              <div class="dept-block">
+                <div class="dept-block-header"><span>${dName}</span></div>
+                <div class="assignee-chips">${filterChips}</div>
+              </div>
+            `;
+
+            let fanChips = '';
+            deptMembers.forEach(m => {
+              const isSel = selectedFanMembers.includes(m.name);
+              fanChips += `
+                <button type="button" class="chip-btn ${isSel ? 'active' : ''}" onclick="toggleFanSel('${m.name}')">
+                  ${m.name}
+                </button>
+              `;
+            });
+            fanContainer.innerHTML += `
+              <div class="dept-block">
+                <div class="dept-block-header">
+                  <span>${dName}</span>
+                  <button type="button" class="btn-toggle-icon" style="padding:2px 6px; font-size:10px;" onclick="batchSelectFanDept('${dName}')">全選/全撤</button>
+                </div>
+                <div class="assignee-chips">${fanChips}</div>
+              </div>
+            `;
+
+            let daoChips = '';
+            deptMembers.forEach(m => {
+              const isSel = selectedDaoMembers.includes(m.name);
+              daoChips += `
+                <button type="button" class="chip-btn ${isSel ? 'active' : ''}" onclick="toggleDaoSel('${m.name}')">
+                  ${m.name}
+                </button>
+              `;
+            });
+            daoContainer.innerHTML += `
+              <div class="dept-block">
+                <div class="dept-block-header">
+                  <span>${dName}</span>
+                  <button type="button" class="btn-toggle-icon" style="padding:2px 6px; font-size:10px;" onclick="batchSelectDaoDept('${dName}')">全選/全撤</button>
+                </div>
+                <div class="assignee-chips">${daoChips}</div>
+              </div>
+            `;
+          }
+        });
+      }
+
+      window.toggleGanttFilter = function(name) {
+        if (filterGanttMembers.includes(name)) filterGanttMembers = filterGanttMembers.filter(x => x !== name);
+        else filterGanttMembers.push(name);
+        renderGantt();
+      };
+
+      window.toggleFanSel = function(name) {
+        if (selectedFanMembers.includes(name)) selectedFanMembers = selectedFanMembers.filter(x => x !== name);
+        else selectedFanMembers.push(name);
+        renderMemberBatchChips();
+      };
+
+      window.batchSelectFanDept = function(dName) {
+        const deptM = members.filter(m => m.dept === dName).map(m => m.name);
+        const allSel = deptM.every(n => selectedFanMembers.includes(n));
+        if (allSel) selectedFanMembers = selectedFanMembers.filter(n => !deptM.includes(n));
+        else deptM.forEach(n => { if (!selectedFanMembers.includes(n)) selectedFanMembers.push(n); });
+        renderMemberBatchChips();
+      };
+
+      window.toggleDaoSel = function(name) {
+        if (selectedDaoMembers.includes(name)) selectedDaoMembers = selectedDaoMembers.filter(x => x !== name);
+        else selectedDaoMembers.push(name);
+        renderMemberBatchChips();
+      };
+
+      window.batchSelectDaoDept = function(dName) {
+        const deptM = members.filter(m => m.dept === dName).map(m => m.name);
+        const allSel = deptM.every(n => selectedDaoMembers.includes(n));
+        if (allSel) selectedDaoMembers = selectedDaoMembers.filter(n => !deptM.includes(n));
+        else deptM.forEach(n => { if (!selectedDaoMembers.includes(n)) selectedDaoMembers.push(n); });
+        renderMemberBatchChips();
+      };
+
+      document.getElementById('addFanBtn').addEventListener('click', () => {
+        const type = document.getElementById('fanTypeSelect').value;
+        const start = document.getElementById('fanStart').value;
+        const end = document.getElementById('fanEnd').value;
+
+        if (!start || !end) return showToast('請選擇開始與結束日期！');
+        if (selectedFanMembers.length === 0) return showToast('請至少點選一位人員！');
+
+        selectedFanMembers.forEach(memberName => {
+          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start, end });
+        });
+
+        selectedFanMembers = [];
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
+        showToast('批次新增成功！');
+      });
+
+      document.getElementById('addDaoBtn').addEventListener('click', () => {
+        const type = document.getElementById('daoTypeSelect').value;
+        const singleDate = document.getElementById('daoSingleDate').value;
+
+        if (!singleDate) return showToast('請選擇事故日期！');
+        if (selectedDaoMembers.length === 0) return showToast('請至少點選一位成員！');
+
+        selectedDaoMembers.forEach(memberName => {
+          leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start: singleDate, end: singleDate });
+        });
+
+        selectedDaoMembers = [];
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
+        showToast('批次新增事故成功！');
+      });
+
+      window.toggleLeaveSection = function(type) {
+        leaveCollapsed[type] = !leaveCollapsed[type];
+        renderLeaveList();
+      };
+
+      function renderLeaveList() {
+        const fanContainer = document.getElementById('fanLeaveContainer');
+        const daoContainer = document.getElementById('daoLeaveContainer');
+        const fanCountBadge = document.getElementById('fanLeaveCountBadge');
+        const daoCountBadge = document.getElementById('daoLeaveCountBadge');
+
+        const fanArrow = document.getElementById('fanLeaveArrow');
+        const daoArrow = document.getElementById('daoLeaveArrow');
+
+        fanContainer.innerHTML = ''; daoContainer.innerHTML = '';
+
+        const fanList = leaveRecords.filter(r => r.type === '返' || r.type === '訓');
+        const daoList = leaveRecords.filter(r => ['島', '公', '檢', '測'].includes(r.type));
+
+        fanCountBadge.textContent = `(${fanList.length}筆)`;
+        daoCountBadge.textContent = `(${daoList.length}筆)`;
+
+        fanArrow.className = leaveCollapsed.fan ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+        daoArrow.className = leaveCollapsed.dao ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+
+        fanContainer.style.display = leaveCollapsed.fan ? 'none' : 'flex';
+        daoContainer.style.display = leaveCollapsed.dao ? 'none' : 'flex';
+
+        if (fanList.length === 0) {
+          fanContainer.innerHTML = `<p class="hint" style="text-align:center; margin:0;">尚無紀錄。</p>`;
+        } else {
+          fanList.forEach(rec => {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.style.borderLeftColor = rec.type === '返' ? '#3b82f6' : '#8b5cf6';
+            card.innerHTML = `
+              <div class="task-header">
+                <span class="task-title">${rec.memberName} (${rec.type === '返' ? '返台' : '受訓'})</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn-edit" onclick="editLeaveRecord('${rec.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                  <button class="btn-danger" onclick="deleteLeaveRecord('${rec.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+                </div>
+              </div>
+              <div class="task-desc">${rec.start} 至 ${rec.end}</div>
+            `;
+            fanContainer.appendChild(card);
+          });
+        }
+
+        if (daoList.length === 0) {
+          daoContainer.innerHTML = `<p class="hint" style="text-align:center; margin:0;">尚無事故紀錄。</p>`;
+        } else {
+          daoList.forEach(rec => {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.style.borderLeftColor = '#f59e0b';
+            card.innerHTML = `
+              <div class="task-header">
+                <span class="task-title">${rec.memberName} (${rec.type})</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn-edit" onclick="editLeaveRecord('${rec.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                  <button class="btn-danger" onclick="deleteLeaveRecord('${rec.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+                </div>
+              </div>
+              <div class="task-desc">日期：${rec.start}</div>
+            `;
+            daoContainer.appendChild(card);
+          });
+        }
+      }
+
+      window.editLeaveRecord = function(id) {
+        const rec = leaveRecords.find(r => r.id === String(id));
+        if (!rec) return showToast('找不到該筆紀錄');
+
+        if (rec.type === '返' || rec.type === '訓') {
+          const newStart = prompt(`編輯【${rec.memberName}】開始日期 (YYYY-MM-DD)：`, rec.start);
+          if (newStart === null) return;
+          const newEnd = prompt(`編輯【${rec.memberName}】結束日期 (YYYY-MM-DD)：`, rec.end);
+          if (newEnd === null) return;
+
+          if (newStart.trim()) rec.start = newStart.trim();
+          if (newEnd.trim()) rec.end = newEnd.trim();
+        } else {
+          const newDate = prompt(`編輯【${rec.memberName}】事故日期 (YYYY-MM-DD)：`, rec.start);
+          if (newDate === null) return;
+
+          if (newDate.trim()) {
+            rec.start = newDate.trim();
+            rec.end = newDate.trim();
+          }
+        }
+
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView();
+        showToast('已更新休假紀錄！');
+      };
+
+      window.deleteLeaveRecord = function(id) {
+        leaveRecords = leaveRecords.filter(r => r.id !== String(id));
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView();
+        showToast('已刪除休假紀錄');
+      };
+
+      window.moveMemberRank = function(idx, direction) {
+        const targetIdx = idx + direction;
+        if (targetIdx < 0 || targetIdx >= members.length) return;
+        const temp = members[idx];
+        members[idx] = members[targetIdx];
+        members[targetIdx] = temp;
+        saveData();
+        renderGantt();
+      };
+
+      function renderGantt() {
+        const headerRow = document.getElementById('ganttHeaderRow');
+        const milestoneRow = document.getElementById('ganttMilestoneRow');
+        const body = document.getElementById('ganttBody');
+        const footer = document.getElementById('ganttCoverageFooter');
+
+        body.innerHTML = '';
+
+        const dates = [];
+        const baseDate = new Date(selectedDateStr);
+
+        const headerParts = ['<th>成員</th>'];
+        const milestoneParts = ['<th style="background:var(--primary-light); color:var(--primary);">重大行程</th>'];
+
+        for (let i = -90; i <= 90; i++) {
+          const d = new Date(baseDate);
+          d.setDate(baseDate.getDate() + i);
+
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const fullDateStr = `${yyyy}-${mm}-${dd}`;
+          const displayStr = `${d.getMonth()+1}/${d.getDate()}`;
+          const isToday = (i === 0);
+
+          dates.push({ full: fullDateStr, display: displayStr, isToday });
+          headerParts.push(`<th class="${isToday ? 'today-col' : ''}">${displayStr}</th>`);
+
+          const activeMS = milestones.filter(m => fullDateStr >= m.start && fullDateStr <= m.end);
+          if (activeMS.length > 0) {
+            let innerHtml = '';
+            activeMS.forEach(ms => {
+              const bg = milestoneColorMap[ms.category] || 'rgba(59, 130, 246, 0.45)';
+              innerHtml += `<div class="ms-bar" style="background:${bg};" title="${ms.category}">${ms.category}</div>`;
+            });
+            milestoneParts.push(`<td style="padding:2px; vertical-align:middle;">${innerHtml}</td>`);
+          } else {
+            milestoneParts.push(`<td></td>`);
+          }
+        }
+
+        headerRow.innerHTML = headerParts.join('');
+        milestoneRow.innerHTML = milestoneParts.join('');
+
+        if (members.length === 0) {
+          body.innerHTML = `<tr><td colspan="182" style="text-align:center; padding:12px;">尚無成員資料</td></tr>`;
+          footer.innerHTML = '<th>戰力比</th>';
+          return;
+        }
+
+        let sortedMembers = getSortedMembers();
+        if (filterGanttMembers.length > 0) {
+          sortedMembers = sortedMembers.filter(m => filterGanttMembers.includes(m.name));
+        }
+
+        const rowFragment = document.createDocumentFragment();
+
+        sortedMembers.forEach((m) => {
+          const realIdx = members.findIndex(x => x.id === m.id);
+
+          const tr = document.createElement('tr');
+          tr.setAttribute('draggable', 'true');
+          tr.dataset.index = realIdx;
+
+          const cellParts = [`
+            <td>
+              <span style="font-weight:700;">${m.name}</span>
+              <span class="order-btn-group">
+                <button class="order-btn" onclick="moveMemberRank(${realIdx}, -1)">▲</button>
+                <button class="order-btn" onclick="moveMemberRank(${realIdx}, 1)">▼</button>
+              </span>
+            </td>
+          `];
+
+          dates.forEach(dObj => {
+            const leave = leaveRecords.find(r => r.memberName === m.name && dObj.full >= r.start && dObj.full <= r.end);
+
+            if (leave) {
+              if (leave.type === '返') cellParts.push(`<td><span class="badge-fan">返</span></td>`);
+              else if (leave.type === '訓') cellParts.push(`<td><span class="badge-xun">訓</span></td>`);
+              else if (leave.type === '島') cellParts.push(`<td><span class="badge-dao">島</span></td>`);
+              else if (leave.type === '公') cellParts.push(`<td><span class="badge-gong">公</span></td>`);
+              else if (leave.type === '檢') cellParts.push(`<td><span class="badge-jian">檢</span></td>`);
+              else if (leave.type === '測') cellParts.push(`<td><span class="badge-ce">測</span></td>`);
+              else cellParts.push(`<td><span class="badge-dao">${leave.type}</span></td>`);
+            } else {
+              cellParts.push(`<td><span style="color:var(--text-sub);">•</span></td>`);
+            }
+          });
+
+          tr.innerHTML = cellParts.join('');
+
+          tr.addEventListener('dragstart', (e) => {
+            dragSrcIndex = realIdx;
+            tr.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+
+          tr.addEventListener('dragend', () => {
+            tr.classList.remove('dragging');
+            document.querySelectorAll('.gantt-table tr').forEach(row => row.classList.remove('drag-over'));
+          });
+
+          tr.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            tr.classList.add('drag-over');
+          });
+
+          tr.addEventListener('dragleave', () => {
+            tr.classList.remove('drag-over');
+          });
+
+          tr.addEventListener('drop', (e) => {
+            e.preventDefault();
+            tr.classList.remove('drag-over');
+            const targetIdx = realIdx;
+
+            if (dragSrcIndex !== null && dragSrcIndex !== targetIdx) {
+              const movedItem = members.splice(dragSrcIndex, 1)[0];
+              members.splice(targetIdx, 0, movedItem);
+              saveData();
+              renderGantt();
+            }
+          });
+
+          rowFragment.appendChild(tr);
+        });
+
+        body.appendChild(rowFragment);
+
+        let sumRatio = 0;
+        const footerParts = ['<th>戰力比</th>'];
+        dates.forEach(dObj => {
+          const leaveCount = leaveRecords.filter(r => dObj.full >= r.start && dObj.full <= r.end).length;
+          const ratio = members.length > 0 ? Math.max(0, Math.round(((members.length - leaveCount) / members.length) * 100)) : 100;
+          sumRatio += ratio;
+
+          let cssClass = 'cov-good';
+          if (ratio < 70) cssClass = 'cov-danger';
+          else if (ratio < 85) cssClass = 'cov-warn';
+
+          footerParts.push(`<td class="${cssClass}">${ratio}%</td>`);
+        });
+        footer.innerHTML = footerParts.join('');
+
+        const todayFanCount = leaveRecords.filter(r => (r.type === '返' || r.type === '訓') && selectedDateStr >= r.start && selectedDateStr <= r.end).length;
+        const todayDaoCount = leaveRecords.filter(r => ['島', '公', '檢', '測'].includes(r.type) && selectedDateStr >= r.start && selectedDateStr <= r.end).length;
+
+        const avgRatio = Math.round(sumRatio / dates.length);
+        document.getElementById('covRateVal').textContent = `${avgRatio}%`;
+        document.getElementById('fanCountVal').textContent = `${todayFanCount} 人`;
+        document.getElementById('daoCountVal').textContent = `${todayDaoCount} 人`;
+
+        renderMemberBatchChips();
+        renderLeaveList();
+      }
+
+      function formatDateShort(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        return `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
+      }
+
+      function renderQuarterlyView() {
+        const tbody = document.getElementById('leaveQuotaBody');
+        tbody.innerHTML = '';
+
+        if (members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:12px;">尚無成員資料</td></tr>`;
+          return;
+        }
+
+        const sortedMembers = getSortedMembers();
+
+        sortedMembers.forEach(m => {
+          let fanDaysTotal = 0;
+          const fanRanges = [];
+
+          leaveRecords
+            .filter(r => r.memberName === m.name && (r.type === '返' || r.type === '訓'))
+            .sort((a, b) => a.start.localeCompare(b.start))
+            .forEach(r => {
+              const dStart = new Date(r.start);
+              const dEnd = new Date(r.end);
+              const diffDays = Math.ceil(Math.abs(dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+              fanDaysTotal += diffDays;
+              fanRanges.push(`[${r.type}] ${formatDateShort(r.start)} ~ ${formatDateShort(r.end)}`);
+            });
+
+          const fanDetailsStr = fanRanges.length > 0 ? `${fanDaysTotal} 天 (${fanRanges.join(' / ')})` : '0 天';
+
+          const daoRecords = leaveRecords
+            .filter(r => r.memberName === m.name && ['島', '公', '檢', '測'].includes(r.type))
+            .sort((a, b) => a.start.localeCompare(b.start));
+
+          const daoDaysTotal = daoRecords.length;
+          const daoDatesStrList = daoRecords.map(r => `[${r.type}] ${formatDateShort(r.start)}`);
+          const daoDetailsStr = daoDaysTotal > 0 ? `${daoDaysTotal} 天 (${daoDatesStrList.join('、')})` : '0 天';
+
+          tbody.innerHTML += `
+            <tr>
+              <td><b>${m.name}</b> (${m.dept})</td>
+              <td style="text-align:left; font-size:11px;">${fanDetailsStr}</td>
+              <td style="text-align:left; font-size:11px;">${daoDetailsStr}</td>
+            </tr>
+          `;
+        });
+      }
+
+      function renderLogTasks() {
+        const container = document.getElementById('logTaskList');
+        container.innerHTML = '';
+
+        const start = document.getElementById('logStart').value;
+        const end = document.getElementById('logEnd').value;
+
+        let filtered = tasks;
+        if (start && end) {
+          filtered = tasks.filter(t => t.date >= start && t.date <= end);
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">此區間無紀錄。</p>`;
+          return;
+        }
+
+        filtered.forEach(t => {
+          const card = document.createElement('div');
+          card.className = `task-card`;
+          card.style.borderLeftColor = t.color || '#3b82f6';
+          
+          const memberInfo = t.isGuardTask 
+            ? `預計時間：${t.duration || 120} 分鐘` 
+            : `預計時間：${t.duration || 15} 分鐘 | 參與成員：${t.assignees && t.assignees.length > 0 ? t.assignees.join(', ') : '未分派成員'}`;
+
+          const coordHtml = t.coord ? `<div style="font-size:11px; color:var(--primary); font-weight:700;">📌 協調事項：${t.coord}</div>` : '';
+
+          card.innerHTML = `
+            <div style="font-weight:700;">${t.title} (${t.date})</div>
+            <div style="font-size:12px; color:var(--text-sub); white-space:pre-line;">${t.desc}</div>
+            ${coordHtml}
+            <div style="font-size:11px; color:var(--primary); margin-top:4px;">${memberInfo}</div>
+            <div style="font-size:11px; margin-top:4px;">狀態：${t.status} | 檢核人：${t.checker}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.exportPrintPDF = function() {
+        window.print();
+      };
+
+      window.exportTextSummary = function() {
+        const start = document.getElementById('logStart').value;
+        const end = document.getElementById('logEnd').value;
+
+        let filtered = tasks;
+        if (start && end) filtered = tasks.filter(t => t.date >= start && t.date <= end);
+
+        if (filtered.length === 0) return showToast('此區間無內容可複製');
+
+        let text = `【排部/迫砲排 任務與衛哨發佈】(${start} ~ ${end})\n----------------------------\n`;
+        filtered.forEach((t, i) => {
+          text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
+          if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
+          if (t.coord) text += `   協調事項：${t.coord}\n`;
+          text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
+        });
+
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('任務摘要已複製到剪貼簿，可直接貼至LINE！');
+        });
+      };
+
+      document.getElementById('logStart').addEventListener('change', renderLogTasks);
+      document.getElementById('logEnd').addEventListener('change', renderLogTasks);
+
+      document.getElementById('guardDate').value = selectedDateStr;
+      document.getElementById('logStart').value = selectedDateStr;
+      document.getElementById('logEnd').value = selectedDateStr;
+      document.getElementById('fanStart').value = selectedDateStr;
+      document.getElementById('fanEnd').value = selectedDateStr;
+      document.getElementById('daoSingleDate').value = selectedDateStr;
+
+      renderCalendar();
+      renderTaskCalendar();
+      renderDayTasks();
+      renderMembers();
+      renderGuardSlots();
+      renderPublishedGuards();
+      renderWeeklyMatrix();
+      renderWeeklyGuardSummary();
+      renderColorPicker();
+      renderCatSelectAndList();
+      renderWarnos();
+      renderLogTasks();
+      renderMilestones();
+      renderGantt();
+      renderQuarterlyView();
     });
   </script>
 </body>
