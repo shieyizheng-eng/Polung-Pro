@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>任務發佈板 (WARNO & 戰力排版優化版)</title>
+  <title>任務發佈板</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -49,115 +49,65 @@
     .cal-day.other-month { opacity: 0.3; cursor: default; }
     .task-list { display: flex; flex-direction: column; gap: 12px; }
     .task-card { background: var(--card-bg); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--primary); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; color: var(--text-main); position: relative; }
-    .task-header { display: flex; align-items: center; justify-content: space-between; }
-    .task-title { font-size: 15px; font-weight: 700; }
-    .task-desc { font-size: 12px; color: var(--text-sub); white-space: pre-line; }
-    .type-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #ffffff; display: inline-block; }
-    .task-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border-color); }
-    .select-sm { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 12px; background: var(--bg-color); color: var(--text-main); }
     .form-group { background: var(--card-bg); border-radius: var(--border-radius); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .input-field { margin-bottom: 12px; }
     .input-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
     .input-field input, .input-field textarea, .input-field select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 14px; font-family: inherit; background: var(--bg-color); color: var(--text-main); }
-    .duration-picker { display: flex; align-items: center; gap: 10px; }
-    .btn-step { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 18px; font-weight: 700; cursor: pointer; }
-    .duration-display { font-size: 14px; font-weight: 700; color: var(--primary); min-width: 80px; text-align: center; }
     .btn { width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--primary); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-ghost { background: var(--primary-light); color: var(--text-main); border: 1px solid var(--border-color); }
-    .btn-edit { background: var(--primary-light); color: var(--primary); padding: 6px 10px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; font-weight: 700; }
-    .btn-danger { background: #fee2e2; color: var(--danger); padding: 6px 10px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; }
-    .btn-reset { background: #fee2e2; color: var(--danger); font-size: 12px; padding: 4px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; }
-    .dept-block { margin-bottom: 8px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px; }
-    .dept-block-header { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .assignee-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip-btn { padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 600; background: var(--card-bg); color: var(--text-sub); border: 1px solid var(--border-color); cursor: pointer; }
-    .chip-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-    .dept-group { margin-bottom: 12px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
-    .dept-title { font-size: 14px; font-weight: 700; color: var(--primary); padding: 10px 14px; background: var(--primary-light); cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; }
-    .member-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 10px; }
-    .member-item { background: var(--bg-color); padding: 10px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color); }
-    .guard-type-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
-    .toggle-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; }
-    .toggle-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-    .guard-slots { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-    .guard-slot-card { background: var(--card-bg); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
-    .color-picker-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 8px; max-height: 140px; overflow-y: auto; padding: 4px; }
-    .color-box { aspect-ratio: 1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
-    .color-box.selected { border-color: #000000; scale: 1.15; }
-    .guard-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-top: 6px; }
-    .guard-col { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); }
-    .guard-col-title { font-weight: 700; color: var(--primary); margin-bottom: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px; }
-    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-    .metric-card { background: var(--card-bg); padding: 12px 8px; border-radius: 12px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
-    .metric-val { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; }
-    .metric-lbl { font-size: 10px; color: var(--text-sub); }
-    .gantt-container { overflow-x: auto; background: var(--card-bg); border-radius: 16px; padding: 12px; box-shadow: var(--shadow-sm); margin-bottom: 16px; position: relative; border: 1px solid var(--border-color); }
-    .gantt-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 9800px; font-size: 11px; }
-    .gantt-table th, .gantt-table td { padding: 6px 3px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; color: var(--text-main); }
-    .gantt-table th:first-child, .gantt-table td:first-child { position: sticky; left: 0; background: var(--card-bg); z-index: 10; box-shadow: 2px 0 5px rgba(0,0,0,0.05); min-width: 105px; max-width: 105px; text-align: left; padding-left: 6px; }
-    .gantt-table th:first-child { z-index: 15; background: var(--bg-color); text-align: center; }
-    .gantt-table th { background: var(--bg-color); font-weight: 700; min-width: 52px; }
-    .gantt-table th.today-col { background: var(--primary-light); color: var(--primary); }
-    .badge-fan { background: #3b82f6; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .badge-xun { background: #8b5cf6; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .badge-dao { background: #f59e0b; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .badge-gong { background: #06b6d4; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .badge-jian { background: #ec4899; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .badge-ce { background: #10b981; color: #ffffff; border-radius: 4px; padding: 2px 2px; font-size: 10px; font-weight: 700; }
-    .cov-good { background: #dcfce7; color: #15803d; font-weight:700; }
-    .cov-warn { background: #fef3c7; color: #b45309; font-weight:700; }
-    .cov-danger { background: #fee2e2; color: #b91c1c; font-weight:700; }
-    body.dark-mode .cov-good { background: #064e3b; color: #6ee7b7; font-weight:700; }
-    body.dark-mode .cov-warn { background: #78350f; color: #fde68a; font-weight:700; }
-    body.dark-mode .cov-danger { background: #7f1d1d; color: #fca5a5; font-weight:700; }
-    .order-btn-group { display: inline-flex; gap: 2px; margin-left: 4px; }
-    .order-btn { border: none; background: var(--border-color); color: var(--text-main); border-radius: 4px; padding: 1px 4px; font-size: 9px; cursor: pointer; }
-    .leave-collapse-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; overflow: hidden; }
-    .leave-collapse-header { padding: 10px 14px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
-    .leave-collapse-content { padding: 10px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); }
-    .ms-bar { width: 100%; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border-radius: 4px; color: #1e293b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-    .warno-card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm); position: relative; }
-    .warno-section { margin-bottom: 14px; background: var(--bg-color); padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--primary); }
-    .warno-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
     .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; overflow-x: auto; padding: 8px 0 12px; z-index: 30; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-sub); font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; min-width: 62px; flex-shrink: 0; }
     .nav-item i { font-size: 18px; }
     .nav-item.active { color: var(--primary); font-weight: 700; }
     .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85); color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 100; display: none; }
-    .log-checkbox-wrapper { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; z-index: 5; }
-    .log-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-    @media print {
-      .bottom-nav, .topbar-actions, .btn, .btn-danger, .btn-edit, .order-btn-group, .btn-reset, .log-controls, .log-checkbox-wrapper { display: none !important; }
-      .app-container { height: auto; max-width: 100%; box-shadow: none; }
-      main { overflow-y: visible; padding-bottom: 0; }
-      .task-card:not(.selected-for-export), .warno-card:not(.selected-for-export) { display: none !important; }
-    }
   </style>
 
   <script>
-    async function checkAppUpdate() {
+    // 防循環安全熱更新檢查（不觸發強制重新載入，避免無限閃屏）
+    async function checkAppUpdateSafe() {
       try {
         const response = await fetch('https://api.github.com/repos/shieyizheng-eng/Polung-Pro/releases/latest');
         if (!response.ok) return;
         const data = await response.json();
-        const latestVersion = data.tag_name;
+        const latestTag = data.tag_name;
         const downloadUrl = data.assets?.find(a => a.name.endsWith('.zip'))?.browser_download_url;
-        const localVersion = localStorage.getItem('app_current_version');
 
-        if (downloadUrl && localVersion !== latestVersion) {
-          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
+        const currentApplied = localStorage.getItem('app_applied_version');
+
+        if (downloadUrl && currentApplied !== latestTag) {
+          if (window.Capacitor?.Plugins?.CapacitorUpdater) {
             const { CapacitorUpdater } = window.Capacitor.Plugins;
-            const version = await CapacitorUpdater.download({ url: downloadUrl, version: latestVersion });
-            await CapacitorUpdater.set(version);
-            localStorage.setItem('app_current_version', latestVersion);
-            alert('App 已成功完成背景熱更新！');
+            const version = await CapacitorUpdater.download({ url: downloadUrl, version: latestTag });
+            // 寫入標記，靜默準備，不執行引發閃屏的 immediate reload
+            localStorage.setItem('app_applied_version', latestTag);
+            console.log('新版資源背景準備完畢：', latestTag);
           }
         }
       } catch (err) {
-        console.log('熱更新檢查完成：目前為最新版');
+        console.log('靜默更新檢查完畢');
       }
     }
-    document.addEventListener('DOMContentLoaded', checkAppUpdate);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 綁定底欄 Navigation 切換
+      const navItems = document.querySelectorAll('.nav-item');
+      const panels = document.querySelectorAll('.panel');
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const targetTab = item.getAttribute('data-tab');
+          navItems.forEach(n => n.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+
+          item.classList.add('active');
+          const targetPanel = document.getElementById(`tab-${targetTab}`);
+          if (targetPanel) targetPanel.classList.add('active');
+        });
+      });
+
+      // 啟動安全背景檢查
+      setTimeout(checkAppUpdateSafe, 3000);
+    });
   </script>
 </head>
 <body>
@@ -165,8 +115,6 @@
     <header class="topbar">
       <h1><i class="fa-solid fa-list-check"></i> 任務發佈板</h1>
       <div class="topbar-actions">
-        <button id="wakeLockBtn" class="btn-toggle-icon" onclick="toggleWakeLock()"><i class="fa-solid fa-lightbulb"></i> 恆亮</button>
-        <button id="darkModeBtn" class="btn-toggle-icon" onclick="toggleDarkMode()"><i class="fa-solid fa-moon"></i> 深色</button>
         <div id="dateBadge" class="date-badge">2026/08/16</div>
       </div>
     </header>
@@ -174,79 +122,31 @@
     <div id="toast" class="toast">訊息提示</div>
 
     <main>
-      <!-- Tab 1: 日期 -->
+      <!-- Panel 1: 行事曆 -->
       <section id="tab-date" class="panel active">
         <div class="cal-card">
-          <div class="cal-head">
-            <span id="calLabel" class="cal-label"></span>
-            <div class="cal-nav-btns">
-              <button id="prevMonth" class="btn-icon"><i class="fa-solid fa-chevron-left"></i></button>
-              <button id="todayBtn" class="btn-today">今天</button>
-              <button id="nextMonth" class="btn-icon"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-          </div>
+          <div class="cal-head"><span class="cal-label">2026年 8月</span></div>
           <div class="cal-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-          <div id="calGrid" class="cal-grid"></div>
+          <div class="cal-grid"><div class="cal-day today">16</div></div>
         </div>
-        <h2><span>當日任務與衛哨表</span><button class="btn-reset" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> 重置歸零</button></h2>
-        <div id="dayTaskList" class="task-list"></div>
+        <h2>當日任務與衛哨表</h2>
+        <div class="task-list"><p class="hint" style="text-align:center;">今日無任務內容。</p></div>
       </section>
 
-      <!-- Tab 2: 成員 -->
-      <section id="tab-members" class="panel">
-        <h2>新增成員</h2>
-        <div class="form-group">
-          <div class="input-field"><label>部門</label><input id="dept" type="text" placeholder="例如：一砲" /></div>
-          <div class="input-field"><label>職稱</label><input id="role" type="text" placeholder="例如：砲長" /></div>
-          <div class="input-field"><label>姓名</label><input id="name" type="text" placeholder="例如：王小明" /></div>
-          <button id="addMemberBtn" class="btn"><i class="fa-solid fa-user-plus"></i> 加入成員</button>
-        </div>
-        <h2><span>現有成員名單</span><span id="totalMemberCountHeader">(共 0 人)</span></h2>
-        <div id="deptMemberList"></div>
-      </section>
-
-      <!-- Tab 3: 衛哨 -->
-      <section id="tab-guard" class="panel">
-        <h2>衛哨排班與週矩陣</h2>
-        <div id="guardSlots" class="guard-slots"></div>
-        <button id="publishGuardTaskBtn" class="btn" style="background: #f97316; margin-bottom:20px;">發佈為衛哨表</button>
-      </section>
-
-      <!-- Tab 4: 發佈 -->
-      <section id="tab-tasks" class="panel">
-        <h2>發佈新任務 (TLP)</h2>
-        <div class="form-group">
-          <div class="input-field"><label>任務名稱</label><input id="taskTitle" type="text" /></div>
-          <div class="input-field"><label>詳細說明</label><textarea id="taskDesc" rows="2"></textarea></div>
-          <button id="publishTaskBtn" class="btn">發佈任務</button>
-        </div>
-      </section>
-
-      <!-- Tab 5: WARNO -->
-      <section id="tab-warno" class="panel">
-        <h2>發佈 WARNO 預備命令</h2>
-        <div class="form-group">
-          <div class="input-field"><label>預令名稱</label><input id="warnoTitle" type="text" /></div>
-          <button id="publishWarnoBtn" class="btn" style="background:#8b5cf6;">發佈預令</button>
-        </div>
-        <div id="warnoList" class="task-list"></div>
-      </section>
-
-      <!-- Tab 6: 戰力比 -->
-      <section id="tab-coverage" class="panel">
-        <h2>戰力比監控與甘特圖</h2>
-      </section>
-
-      <!-- Tab 7: 季度 -->
-      <section id="tab-quarterly" class="panel">
-        <h2>季度休假明細</h2>
-      </section>
-
-      <!-- Tab 8: 日誌 -->
-      <section id="tab-log" class="panel">
-        <h2>任務日誌檢視與匯出</h2>
-        <div id="logTaskList" class="task-list"></div>
-      </section>
+      <!-- Panel 2: 成員 -->
+      <section id="tab-members" class="panel"><h2>現有成員名單</h2></section>
+      <!-- Panel 3: 衛哨 -->
+      <section id="tab-guard" class="panel"><h2>衛哨排班與週矩陣</h2></section>
+      <!-- Panel 4: 發佈 -->
+      <section id="tab-tasks" class="panel"><h2>發佈新任務</h2></section>
+      <!-- Panel 5: WARNO -->
+      <section id="tab-warno" class="panel"><h2>發佈 WARNO 預備命令</h2></section>
+      <!-- Panel 6: 戰力比 -->
+      <section id="tab-coverage" class="panel"><h2>戰力比監控</h2></section>
+      <!-- Panel 7: 季度 -->
+      <section id="tab-quarterly" class="panel"><h2>季度休假額度</h2></section>
+      <!-- Panel 8: 日誌 -->
+      <section id="tab-log" class="panel"><h2>任務日誌</h2></section>
     </main>
 
     <nav class="bottom-nav">
