@@ -96,6 +96,15 @@
     .input-field input, .input-field textarea, .input-field select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 14px; font-family: inherit; background: var(--bg-color); color: var(--text-main); }
 
     .duration-picker { display: flex; align-items: center; gap: 10px; }
+
+    .wheel-picker-wrap { display: flex; gap: 4px; justify-content: center; position: relative; background: var(--bg-color); border-radius: 12px; border: 1px solid var(--border-color); padding: 4px 0; }
+    .wheel-picker-highlight { position: absolute; top: 50%; left: 8px; right: 8px; height: 40px; transform: translateY(-50%); border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); pointer-events: none; background: var(--primary-light); opacity: 0.3; border-radius: 6px; z-index: 1; }
+    .wheel-picker-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .wheel-picker-scroll { height: 120px; width: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; text-align: center; scrollbar-width: none; }
+    .wheel-picker-scroll::-webkit-scrollbar { display: none; }
+    .wheel-picker-item { height: 40px; line-height: 40px; scroll-snap-align: center; font-size: 15px; font-weight: 600; color: var(--text-sub); transition: font-size 0.1s, color 0.1s; }
+    .wheel-picker-item.selected { color: var(--primary); font-size: 19px; font-weight: 700; }
+    .wheel-picker-unit-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; font-weight: 700; }
     .btn-step { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 18px; font-weight: 700; cursor: pointer; }
     .duration-display { font-size: 14px; font-weight: 700; color: var(--primary); min-width: 80px; text-align: center; }
 
@@ -373,21 +382,21 @@
           <div class="input-field"><label style="color:var(--primary);">【TLP 協調事項】(Coordinating Instructions)</label><textarea id="taskCoord" rows="2" placeholder="填寫跨單位/管制注意事項..."></textarea></div>
 
           <div class="input-field">
-            <label>預計使用時間</label>
-            <div class="duration-picker">
-              <button type="button" class="btn-step" id="decDurH">-</button>
-              <span id="durHDisplay" class="duration-display">0 時</span>
-              <button type="button" class="btn-step" id="incDurH">+</button>
-            </div>
-            <div class="duration-picker" style="margin-top:6px;">
-              <button type="button" class="btn-step" id="decDurM">-</button>
-              <span id="durMDisplay" class="duration-display">15 分</span>
-              <button type="button" class="btn-step" id="incDurM">+</button>
-            </div>
-            <div class="duration-picker" style="margin-top:6px;">
-              <button type="button" class="btn-step" id="decDurS">-</button>
-              <span id="durSDisplay" class="duration-display">0 秒</span>
-              <button type="button" class="btn-step" id="incDurS">+</button>
+            <label>預計使用時間（上下滑動選擇）</label>
+            <div class="wheel-picker-wrap">
+              <div class="wheel-picker-highlight"></div>
+              <div class="wheel-picker-col">
+                <div class="wheel-picker-scroll" id="wheelH"></div>
+                <div class="wheel-picker-unit-label">時</div>
+              </div>
+              <div class="wheel-picker-col">
+                <div class="wheel-picker-scroll" id="wheelM"></div>
+                <div class="wheel-picker-unit-label">分</div>
+              </div>
+              <div class="wheel-picker-col">
+                <div class="wheel-picker-scroll" id="wheelS"></div>
+                <div class="wheel-picker-unit-label">秒</div>
+              </div>
             </div>
           </div>
 
@@ -520,6 +529,20 @@
           <button id="addFanBtn" class="btn"><i class="fa-solid fa-plane-departure"></i> 批次新增返台/受訓</button>
         </div>
 
+        <div class="leave-collapse-card">
+          <div class="leave-collapse-header" onclick="toggleFanImportCollapse()">
+            <span><i class="fa-solid fa-file-import"></i> 批次匯入返台/受訓（多筆不同日期）</span>
+            <i id="fanImportCollapseArrow" class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div id="fanImportCollapseContent" class="leave-collapse-content" style="display:none;">
+            <p class="hint" style="margin-top:0;">每行一筆，格式：<b>類型,姓名,開始日期,結束日期</b>（類型填「返」或「訓」；結束日期可省略，代表當天單日）。</p>
+            <div class="input-field" style="margin-bottom:8px;">
+              <textarea id="fanImportText" rows="6" placeholder="範例：&#10;返,王小明,2026-09-01,2026-09-05&#10;訓,李小華,2026-09-10,2026-09-12&#10;返,陳大同,2026-09-15"></textarea>
+            </div>
+            <button id="fanImportBtn" class="btn"><i class="fa-solid fa-file-import"></i> 開始匯入</button>
+          </div>
+        </div>
+
         <h2>批次新增事故 (島/公/檢/測)</h2>
         <div class="form-group">
           <div class="input-field">
@@ -562,6 +585,28 @@
 
       </section>
 
+      <!-- Panel: 戰備 -->
+      <section id="tab-readiness" class="panel">
+        <h2>戰備編派</h2>
+        <div class="form-group">
+          <div class="input-field">
+            <label>選擇戰備期程（來自戰力比分頁登錄的「戰備」重大行程）</label>
+            <select id="readinessPeriodSelect"></select>
+          </div>
+          <p class="hint" id="readinessNoPeriodHint" style="display:none;">尚無戰備期程，請先至「戰力比」分頁新增類別為「戰備」的重大行程。</p>
+        </div>
+
+        <div id="readinessRosterForm" style="display:none;">
+          <h2 id="readinessFormTitle">戰備成員編派</h2>
+          <div id="readinessRosterGroups"></div>
+          <button id="saveReadinessBtn" class="btn" style="background:#10b981; margin-top:8px;"><i class="fa-solid fa-floppy-disk"></i> 儲存編派</button>
+          <button id="cancelEditReadinessBtn" class="btn btn-ghost" style="display:none; margin-top:8px;"><i class="fa-solid fa-xmark"></i> 取消編輯</button>
+        </div>
+
+        <h2 style="margin-top:20px;">已完成編派清單</h2>
+        <div id="readinessList" class="task-list"></div>
+      </section>
+
       <!-- Panel 7: 季度明細 -->
       <section id="tab-quarterly" class="panel">
         <h2>成員季度休假額度統計 (依部門排序)</h2>
@@ -578,6 +623,32 @@
             <tbody id="leaveQuotaBody"></tbody>
           </table>
         </div>
+      </section>
+
+      <!-- Panel: 大紀事 -->
+      <section id="tab-events" class="panel">
+        <h2 id="eventFormTitle">新增大紀事</h2>
+        <div class="form-group">
+          <div class="input-field"><label>日期</label><input id="eventDateInput" type="date" /></div>
+          <div class="input-field">
+            <label>類別</label>
+            <select id="eventCatSelect">
+              <option value="人">人</option>
+              <option value="作情">作情</option>
+              <option value="訓">訓</option>
+              <option value="裝備">裝備</option>
+              <option value="彈藥">彈藥</option>
+              <option value="國財">國財</option>
+            </select>
+          </div>
+          <div class="input-field"><label>內容（可條列式輸入）</label><textarea id="eventContentInput" rows="3" placeholder="例如：&#10;1. 士官晉任名冊呈報&#10;2. ○○裝備故障待料"></textarea></div>
+          <button id="addEventBtn" class="btn"><i class="fa-solid fa-plus"></i> 新增紀事</button>
+          <button id="cancelEditEventBtn" class="btn btn-ghost" style="display:none; margin-top:8px;"><i class="fa-solid fa-xmark"></i> 取消編輯</button>
+        </div>
+
+        <h2>已登錄大紀事（依類別檢視）</h2>
+        <div id="eventCatFilterChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+        <div id="eventList" class="task-list"></div>
       </section>
 
       <!-- Panel 8: 日誌 -->
@@ -604,6 +675,20 @@
 
         <div id="logTaskList" class="task-list"></div>
 
+        <h2 style="margin-top:20px;">大紀事紀錄</h2>
+        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
+          <div style="display:flex; gap:16px;">
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="selectAllEventLogBtn" checked onchange="toggleAllEventLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
+            </label>
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="deselectAllEventLogBtn" onchange="toggleAllEventLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
+            </label>
+          </div>
+        </div>
+        <div id="logEventList" class="task-list"></div>
+
         <h2 style="margin-top:20px;">日誌輸出與呈核</h2>
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
           <button class="btn btn-ghost" onclick="exportPrintPDF()"><i class="fa-solid fa-file-pdf"></i> 高解析 PDF / 列印</button>
@@ -620,7 +705,9 @@
       <button class="nav-item" data-tab="tasks"><i class="fa-solid fa-plus-circle"></i><span>發佈</span></button>
       <button class="nav-item" data-tab="warno"><i class="fa-solid fa-scroll"></i><span>Warno</span></button>
       <button class="nav-item" data-tab="coverage"><i class="fa-solid fa-chart-line"></i><span>戰力比</span></button>
+      <button class="nav-item" data-tab="readiness"><i class="fa-solid fa-shield-heart"></i><span>戰備</span></button>
       <button class="nav-item" data-tab="quarterly"><i class="fa-solid fa-calendar-week"></i><span>季度</span></button>
+      <button class="nav-item" data-tab="events"><i class="fa-solid fa-clipboard-list"></i><span>大紀事</span></button>
       <button class="nav-item" data-tab="log"><i class="fa-solid fa-book"></i><span>日誌</span></button>
     </nav>
   </div>
@@ -637,6 +724,13 @@
 
     const deptOrder = ['排部', '一砲', '二砲', '三砲', '步排', 'PT'];
     const deptWeightMap = { '排部': 1, '一砲': 2, '二砲': 3, '三砲': 4, '步排': 5, 'PT': 6 };
+
+    const readinessPositions = [
+      { dept: '排部', roles: ['排長', '話務'] },
+      { dept: '一砲', roles: ['砲長', '砲副', '裝填', '整備', '彈藥'] },
+      { dept: '二砲', roles: ['砲長', '砲副', '裝填', '整備', '彈藥'] },
+      { dept: '射指', roles: ['組長', '水平', '話務'] }
+    ];
 
     const milestoneColorMap = {
       '基地': 'rgba(239, 68, 68, 0.45)',
@@ -725,6 +819,7 @@
       let leaveRecords = JSON.parse(localStorage.getItem('polung_leaves')) || [];
       let guardAssignments = JSON.parse(localStorage.getItem('polung_guards')) || {};
       let milestones = JSON.parse(localStorage.getItem('polung_milestones')) || [];
+      let majorEvents = JSON.parse(localStorage.getItem('polung_events')) || [];
 
       let selectedFanMembers = [];
       let selectedDaoMembers = [];
@@ -734,6 +829,10 @@
       let selectedLogTaskIds = [];
       let editingTaskId = null;
       let eligibilityTab = 'safe';
+      let editingEventId = null;
+      let eventCatFilter = '全部';
+      let selectedLogEventIds = [];
+      let editingReadinessId = null;
 
       let leaveCollapsed = { fan: false, dao: false, taskCat: true };
 
@@ -766,16 +865,17 @@
         localStorage.setItem('polung_leaves', JSON.stringify(leaveRecords));
         localStorage.setItem('polung_guards', JSON.stringify(guardAssignments));
         localStorage.setItem('polung_milestones', JSON.stringify(milestones));
+        localStorage.setItem('polung_events', JSON.stringify(majorEvents));
       }
 
       document.getElementById('resetDataBtn').addEventListener('click', () => {
         if (confirm('確定要清除所有進度與資料並重置歸零嗎？')) {
           localStorage.clear();
-          members = []; tasks = []; warnos = []; leaveRecords = []; guardAssignments = {}; milestones = [];
+          members = []; tasks = []; warnos = []; leaveRecords = []; guardAssignments = {}; milestones = []; majorEvents = [];
           selectedFanMembers = []; selectedDaoMembers = []; filterGanttMembers = []; collapsedDepts = {};
           renderCalendar(); renderTaskCalendar(); renderDayTasks();
           renderMembers(); renderGuardSlots(); renderPublishedGuards(); renderWeeklyGuardSummary(); renderWeeklyMatrix();
-          renderMilestones(); renderGantt(); renderQuarterlyView(); renderLogTasks(); renderWarnos();
+          renderMilestones(); renderGantt(); renderQuarterlyView(); renderLogTasks(); renderWarnos(); renderEventList(); renderReadinessList();
           showToast('進度已完全重置歸零！');
         }
       });
@@ -952,7 +1052,7 @@
           });
 
           let assigneeChipsSection = '';
-          if (!task.isGuardTask) {
+          if (!task.isGuardTask && !task.isReadinessTask) {
             let deptBlocksHtml = '';
             if (members.length === 0) {
               deptBlocksHtml = `<span style="font-size:11px; color:var(--text-sub);">尚未匯入成員</span>`;
@@ -998,14 +1098,14 @@
               <span class="task-title">${task.title}</span>
               <div style="display:flex; gap:6px; align-items:center;">
                 <span class="type-badge" style="background:${task.color || '#3b82f6'};">${task.catName || '任務'}</span>
-                ${task.isGuardTask ? `<button class="btn-edit" onclick="editGuardTask('${task.date}')"><i class="fa-solid fa-pen"></i> 編輯</button>` : `<button class="btn-edit" onclick="editTask('${task.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>`}
+                ${task.isGuardTask ? `<button class="btn-edit" onclick="editGuardTask('${task.date}')"><i class="fa-solid fa-pen"></i> 編輯</button>` : task.isReadinessTask ? `<button class="btn-edit" onclick="editReadiness('${task.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>` : `<button class="btn-edit" onclick="editTask('${task.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>`}
                 <button class="btn-danger" onclick="deleteTask('${task.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
               </div>
             </div>
             <div class="task-desc">${task.desc || '無詳細說明'}</div>
             ${coordHtml}
             <div style="font-size:11px; font-weight:700; color:var(--primary);">
-              <i class="fa-regular fa-clock"></i> 預計時間：${task.duration || 120} 分鐘
+              <i class="fa-regular fa-clock"></i> ${task.isReadinessTask ? `編派人數：${task.assignees ? task.assignees.length : 0} 人` : `預計時間：${formatDurationSeconds(getTaskDurationSeconds(task))}`}
             </div>
             ${assigneeChipsSection}
             <div class="task-controls">
@@ -1062,7 +1162,7 @@
 
       window.deleteTask = function(id) {
         tasks = tasks.filter(t => t.id !== id);
-        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards();
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderPublishedGuards(); renderReadinessList();
         showToast('已刪除');
       };
 
@@ -1741,10 +1841,48 @@
         renderCatSelectAndList();
       };
 
-      function updateDurationDisplays() {
-        document.getElementById('durHDisplay').textContent = `${estDurH} 時`;
-        document.getElementById('durMDisplay').textContent = `${estDurM} 分`;
-        document.getElementById('durSDisplay').textContent = `${estDurS} 秒`;
+      const WHEEL_ITEM_HEIGHT = 40;
+
+      function initWheelPicker(scrollEl, maxVal, initialVal, onChange) {
+        scrollEl.innerHTML = '';
+        const padTop = document.createElement('div');
+        padTop.style.height = `${WHEEL_ITEM_HEIGHT}px`;
+        scrollEl.appendChild(padTop);
+
+        for (let i = 0; i <= maxVal; i++) {
+          const item = document.createElement('div');
+          item.className = 'wheel-picker-item';
+          item.textContent = i;
+          item.dataset.val = i;
+          scrollEl.appendChild(item);
+        }
+
+        const padBottom = document.createElement('div');
+        padBottom.style.height = `${WHEEL_ITEM_HEIGHT}px`;
+        scrollEl.appendChild(padBottom);
+
+        let scrollTimer = null;
+        scrollEl.addEventListener('scroll', () => {
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(() => {
+            const idx = Math.round(scrollEl.scrollTop / WHEEL_ITEM_HEIGHT);
+            const clamped = Math.max(0, Math.min(maxVal, idx));
+            scrollEl.scrollTo({ top: clamped * WHEEL_ITEM_HEIGHT, behavior: 'smooth' });
+            scrollEl.querySelectorAll('.wheel-picker-item').forEach(el => {
+              el.classList.toggle('selected', parseInt(el.dataset.val) === clamped);
+            });
+            onChange(clamped);
+          }, 120);
+        });
+
+        setWheelValue(scrollEl, initialVal);
+      }
+
+      function setWheelValue(scrollEl, val) {
+        scrollEl.scrollTop = val * WHEEL_ITEM_HEIGHT;
+        scrollEl.querySelectorAll('.wheel-picker-item').forEach(el => {
+          el.classList.toggle('selected', parseInt(el.dataset.val) === val);
+        });
       }
 
       function getEstimatedDurationSeconds() {
@@ -1756,7 +1894,9 @@
         estDurH = Math.floor(sec / 3600);
         estDurM = Math.floor((sec % 3600) / 60);
         estDurS = sec % 60;
-        updateDurationDisplays();
+        setWheelValue(document.getElementById('wheelH'), estDurH);
+        setWheelValue(document.getElementById('wheelM'), estDurM);
+        setWheelValue(document.getElementById('wheelS'), estDurS);
       }
 
       function formatDurationSeconds(totalSec) {
@@ -1776,24 +1916,9 @@
         return (t.duration || 15) * 60;
       }
 
-      document.getElementById('decDurH').addEventListener('click', () => {
-        if (estDurH > 0) { estDurH -= 1; updateDurationDisplays(); }
-      });
-      document.getElementById('incDurH').addEventListener('click', () => {
-        estDurH += 1; updateDurationDisplays();
-      });
-      document.getElementById('decDurM').addEventListener('click', () => {
-        if (estDurM > 0) { estDurM -= 1; updateDurationDisplays(); }
-      });
-      document.getElementById('incDurM').addEventListener('click', () => {
-        if (estDurM < 59) { estDurM += 1; updateDurationDisplays(); }
-      });
-      document.getElementById('decDurS').addEventListener('click', () => {
-        if (estDurS > 0) { estDurS -= 1; updateDurationDisplays(); }
-      });
-      document.getElementById('incDurS').addEventListener('click', () => {
-        if (estDurS < 59) { estDurS += 1; updateDurationDisplays(); }
-      });
+      initWheelPicker(document.getElementById('wheelH'), 23, estDurH, (v) => { estDurH = v; });
+      initWheelPicker(document.getElementById('wheelM'), 59, estDurM, (v) => { estDurM = v; });
+      initWheelPicker(document.getElementById('wheelS'), 59, estDurS, (v) => { estDurS = v; });
 
       document.getElementById('publishTaskBtn').addEventListener('click', () => {
         const title = document.getElementById('taskTitle').value.trim();
@@ -1884,6 +2009,312 @@
         window.cancelEditTask();
       });
 
+      function renderEventCatFilterChips() {
+        const container = document.getElementById('eventCatFilterChips');
+        if (!container) return;
+        const cats = ['全部', '人', '作情', '訓', '裝備', '彈藥', '國財'];
+        container.innerHTML = cats.map(c => `<button type="button" class="chip-btn ${eventCatFilter === c ? 'active' : ''}" onclick="setEventCatFilter('${c}')">${c}</button>`).join('');
+      }
+
+      window.setEventCatFilter = function(c) {
+        eventCatFilter = c;
+        renderEventCatFilterChips();
+        renderEventList();
+      };
+
+      function renderEventList() {
+        const container = document.getElementById('eventList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        let filtered = majorEvents;
+        if (eventCatFilter !== '全部') filtered = majorEvents.filter(e => e.category === eventCatFilter);
+        filtered = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">尚無紀事。</p>`;
+          return;
+        }
+
+        filtered.forEach(e => {
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.style.borderLeftColor = e.done ? '#22c55e' : '#94a3b8';
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="type-badge" style="background:#8b5cf6;">${e.category}</span>
+              <span style="font-size:11px; color:var(--text-sub);">${e.date}</span>
+            </div>
+            <div style="font-size:13px; white-space:pre-line;">${e.content}</div>
+            <div class="task-controls">
+              <label style="display:flex; align-items:center; gap:4px; font-size:12px; font-weight:700; cursor:pointer;">
+                <input type="checkbox" ${e.done ? 'checked' : ''} onchange="toggleEventDone('${e.id}', this.checked)" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" /> 已執行
+              </label>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-edit" onclick="editEvent('${e.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                <button class="btn-danger" onclick="deleteEvent('${e.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.toggleEventDone = function(id, checked) {
+        const e = majorEvents.find(x => x.id === id);
+        if (e) { e.done = checked; saveData(); renderEventList(); renderLogTasks(); }
+      };
+
+      window.deleteEvent = function(id) {
+        majorEvents = majorEvents.filter(x => x.id !== id);
+        saveData(); renderEventList(); renderLogTasks();
+        showToast('已刪除紀事');
+      };
+
+      window.editEvent = function(id) {
+        const e = majorEvents.find(x => x.id === id);
+        if (!e) return;
+
+        editingEventId = id;
+        document.getElementById('eventFormTitle').textContent = '編輯大紀事 (修改後請按下方儲存)';
+        document.getElementById('eventDateInput').value = e.date;
+        document.getElementById('eventCatSelect').value = e.category;
+        document.getElementById('eventContentInput').value = e.content;
+        document.getElementById('addEventBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存修改';
+        document.getElementById('cancelEditEventBtn').style.display = 'block';
+
+        navItems.forEach(n => n.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-tab="events"]').classList.add('active');
+        document.getElementById('tab-events').classList.add('active');
+      };
+
+      window.cancelEditEvent = function() {
+        editingEventId = null;
+        document.getElementById('eventFormTitle').textContent = '新增大紀事';
+        document.getElementById('eventDateInput').value = selectedDateStr;
+        document.getElementById('eventCatSelect').value = '人';
+        document.getElementById('eventContentInput').value = '';
+        document.getElementById('addEventBtn').innerHTML = '<i class="fa-solid fa-plus"></i> 新增紀事';
+        document.getElementById('cancelEditEventBtn').style.display = 'none';
+      };
+
+      document.getElementById('cancelEditEventBtn').addEventListener('click', () => {
+        window.cancelEditEvent();
+      });
+
+      document.getElementById('addEventBtn').addEventListener('click', () => {
+        const date = document.getElementById('eventDateInput').value || selectedDateStr;
+        const category = document.getElementById('eventCatSelect').value;
+        const content = document.getElementById('eventContentInput').value.trim();
+
+        if (!content) return showToast('請輸入紀事內容！');
+
+        if (editingEventId) {
+          const e = majorEvents.find(x => x.id === editingEventId);
+          if (e) { e.date = date; e.category = category; e.content = content; }
+          showToast('紀事已更新！');
+        } else {
+          majorEvents.push({ id: 'ev_' + Date.now(), date, category, content, done: false });
+          showToast('紀事新增成功！');
+        }
+
+        window.cancelEditEvent();
+        saveData(); renderEventList(); renderLogTasks();
+      });
+
+      function renderReadinessPeriodSelect() {
+        const select = document.getElementById('readinessPeriodSelect');
+        const hint = document.getElementById('readinessNoPeriodHint');
+        const formWrap = document.getElementById('readinessRosterForm');
+        if (!select) return;
+
+        const readinessPeriods = milestones.filter(m => m.category === '戰備').sort((a, b) => a.start.localeCompare(b.start));
+
+        select.innerHTML = `<option value="">-- 請選擇戰備期程 --</option>`;
+        readinessPeriods.forEach(ms => {
+          select.innerHTML += `<option value="${ms.id}">${ms.start} ~ ${ms.end}</option>`;
+        });
+
+        if (readinessPeriods.length === 0) {
+          hint.style.display = 'block';
+          formWrap.style.display = 'none';
+        } else {
+          hint.style.display = 'none';
+        }
+      }
+
+      function renderReadinessRosterGroups(positions) {
+        const container = document.getElementById('readinessRosterGroups');
+        container.innerHTML = '';
+
+        readinessPositions.forEach(group => {
+          let rolesHtml = '';
+          group.roles.forEach(role => {
+            const posKey = `${group.dept}-${role}`;
+            const currentVal = (positions && positions[posKey]) || '';
+
+            let optionsHtml = `<option value="">-- 未指派 --</option>`;
+            getSortedMembers().forEach(m => {
+              optionsHtml += `<option value="${m.name}" ${currentVal === m.name ? 'selected' : ''}>${m.name} (${m.dept})</option>`;
+            });
+
+            rolesHtml += `
+              <div class="input-field" style="margin-bottom:8px;">
+                <label>${role}</label>
+                <select class="readiness-role-select" data-dept="${group.dept}" data-role="${role}">${optionsHtml}</select>
+              </div>
+            `;
+          });
+
+          container.innerHTML += `
+            <div class="dept-group">
+              <div class="dept-title">${group.dept}</div>
+              <div style="padding:10px;">${rolesHtml}</div>
+            </div>
+          `;
+        });
+      }
+
+      function loadReadinessRosterForm(milestoneId) {
+        const formWrap = document.getElementById('readinessRosterForm');
+        if (!milestoneId) {
+          formWrap.style.display = 'none';
+          return;
+        }
+
+        const existingTask = tasks.find(t => t.isReadinessTask && t.milestoneId === milestoneId);
+        renderReadinessRosterGroups(existingTask ? existingTask.positions : null);
+        formWrap.style.display = 'block';
+      }
+
+      document.getElementById('readinessPeriodSelect').addEventListener('change', (e) => {
+        editingReadinessId = null;
+        document.getElementById('readinessFormTitle').textContent = '戰備成員編派';
+        document.getElementById('saveReadinessBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存編派';
+        document.getElementById('cancelEditReadinessBtn').style.display = 'none';
+        loadReadinessRosterForm(e.target.value);
+      });
+
+      function buildReadinessDesc(positions) {
+        let lines = [];
+        readinessPositions.forEach(group => {
+          const roleLines = group.roles
+            .map(role => `${role}：${positions[`${group.dept}-${role}`] || '未指派'}`)
+            .join('、');
+          lines.push(`【${group.dept}】${roleLines}`);
+        });
+        return lines.join('\n');
+      }
+
+      document.getElementById('saveReadinessBtn').addEventListener('click', () => {
+        const milestoneId = document.getElementById('readinessPeriodSelect').value;
+        if (!milestoneId) return showToast('請先選擇戰備期程！');
+
+        const ms = milestones.find(m => m.id === milestoneId);
+        if (!ms) return showToast('找不到對應的戰備期程！');
+
+        const positions = {};
+        const assigneesSet = new Set();
+        document.querySelectorAll('.readiness-role-select').forEach(sel => {
+          const key = `${sel.dataset.dept}-${sel.dataset.role}`;
+          const val = sel.value;
+          positions[key] = val;
+          if (val) assigneesSet.add(val);
+        });
+
+        const desc = buildReadinessDesc(positions);
+        const existingIdx = tasks.findIndex(t => t.isReadinessTask && t.milestoneId === milestoneId);
+
+        const taskPayload = {
+          id: existingIdx > -1 ? tasks[existingIdx].id : 'rd_' + Date.now(),
+          title: `戰備編派 (${ms.start} ~ ${ms.end})`,
+          desc: desc,
+          coord: '',
+          date: ms.start,
+          duration: 0,
+          durationSec: 0,
+          color: '#10b981',
+          catName: '戰備',
+          status: existingIdx > -1 ? tasks[existingIdx].status : '待執行',
+          checker: existingIdx > -1 ? tasks[existingIdx].checker : '未指定',
+          isReadinessTask: true,
+          milestoneId: milestoneId,
+          periodStart: ms.start,
+          periodEnd: ms.end,
+          positions: positions,
+          assignees: Array.from(assigneesSet)
+        };
+
+        if (existingIdx > -1) tasks[existingIdx] = taskPayload;
+        else tasks.push(taskPayload);
+
+        editingReadinessId = null;
+        document.getElementById('readinessFormTitle').textContent = '戰備成員編派';
+        document.getElementById('saveReadinessBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存編派';
+        document.getElementById('cancelEditReadinessBtn').style.display = 'none';
+
+        saveData(); renderCalendar(); renderTaskCalendar(); renderDayTasks(); renderLogTasks(); renderReadinessList();
+        showToast('戰備編派已儲存！');
+      });
+
+      document.getElementById('cancelEditReadinessBtn').addEventListener('click', () => {
+        editingReadinessId = null;
+        document.getElementById('readinessPeriodSelect').value = '';
+        document.getElementById('readinessRosterForm').style.display = 'none';
+        document.getElementById('readinessFormTitle').textContent = '戰備成員編派';
+        document.getElementById('saveReadinessBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存編派';
+        document.getElementById('cancelEditReadinessBtn').style.display = 'none';
+      });
+
+      window.editReadiness = function(id) {
+        const t = tasks.find(x => x.id === id && x.isReadinessTask);
+        if (!t) return;
+
+        editingReadinessId = id;
+        document.getElementById('readinessPeriodSelect').value = t.milestoneId;
+        document.getElementById('readinessFormTitle').textContent = '編輯戰備編派 (修改後請按下方儲存)';
+        renderReadinessRosterGroups(t.positions);
+        document.getElementById('readinessRosterForm').style.display = 'block';
+        document.getElementById('saveReadinessBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 儲存修改';
+        document.getElementById('cancelEditReadinessBtn').style.display = 'block';
+
+        navItems.forEach(n => n.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-tab="readiness"]').classList.add('active');
+        document.getElementById('tab-readiness').classList.add('active');
+      };
+
+      function renderReadinessList() {
+        const container = document.getElementById('readinessList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const readinessTasks = tasks.filter(t => t.isReadinessTask).sort((a, b) => (a.periodStart || '').localeCompare(b.periodStart || ''));
+
+        if (readinessTasks.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">尚無戰備編派紀錄。</p>`;
+          return;
+        }
+
+        readinessTasks.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.style.borderLeftColor = '#10b981';
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="task-title">${t.title}</span>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn-edit" onclick="editReadiness('${t.id}')"><i class="fa-solid fa-pen"></i> 編輯</button>
+                <button class="btn-danger" onclick="deleteTask('${t.id}')"><i class="fa-solid fa-trash"></i> 刪除</button>
+              </div>
+            </div>
+            <div class="task-desc">${t.desc}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
       document.getElementById('addMilestoneBtn').addEventListener('click', () => {
         const cat = document.getElementById('milestoneCatSelect').value;
         const start = document.getElementById('milestoneStart').value;
@@ -1900,6 +2331,7 @@
       });
 
       function renderMilestones() {
+        renderReadinessPeriodSelect();
         const container = document.getElementById('milestoneListContainer');
         container.innerHTML = '';
 
@@ -2158,6 +2590,62 @@
         selectedFanMembers = [];
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
         showToast('批次新增成功！');
+      });
+
+      window.toggleFanImportCollapse = function() {
+        const content = document.getElementById('fanImportCollapseContent');
+        const arrow = document.getElementById('fanImportCollapseArrow');
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'flex' : 'none';
+        arrow.className = isHidden ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+      };
+
+      function parseFanImportLine(line) {
+        const parts = line.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+        if (parts.length < 3) return null;
+
+        let type = null;
+        if (parts[0] === '返' || parts[0] === '返台') type = '返';
+        else if (parts[0] === '訓' || parts[0] === '受訓') type = '訓';
+        if (!type) return null;
+
+        const name = parts[1];
+        const start = parts[2];
+        const end = parts[3] || parts[2];
+        if (!name || !start) return null;
+
+        return { type, name, start, end };
+      }
+
+      document.getElementById('fanImportBtn').addEventListener('click', () => {
+        const raw = document.getElementById('fanImportText').value;
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+        if (lines.length === 0) return showToast('請先貼上要匯入的返台/受訓資料！');
+
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        lines.forEach(line => {
+          const parsed = parseFanImportLine(line);
+          if (!parsed) { skippedCount++; return; }
+
+          const memberExists = members.some(m => m.name === parsed.name);
+          if (!memberExists) { skippedCount++; return; }
+
+          leaveRecords.push({
+            id: 'lv_' + Date.now() + '_' + Math.floor(Math.random() * 100000),
+            memberName: parsed.name,
+            type: parsed.type,
+            start: parsed.start,
+            end: parsed.end
+          });
+          addedCount++;
+        });
+
+        document.getElementById('fanImportText').value = '';
+        saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
+        showToast(`已匯入 ${addedCount} 筆${skippedCount > 0 ? '，略過 ' + skippedCount + ' 筆（格式錯誤或查無成員）' : ''}`);
       });
 
       document.getElementById('addDaoBtn').addEventListener('click', () => {
@@ -2501,6 +2989,8 @@
       }
 
       function renderLogTasks() {
+        renderLogEvents();
+
         const container = document.getElementById('logTaskList');
         container.innerHTML = '';
 
@@ -2528,9 +3018,11 @@
           card.className = `task-card selected-for-export`;
           card.style.borderLeftColor = t.color || '#3b82f6';
           
-          const memberInfo = t.isGuardTask 
-            ? `預計時間：${formatDurationSeconds(getTaskDurationSeconds(t))}` 
-            : `預計時間：${formatDurationSeconds(getTaskDurationSeconds(t))} | 參與成員：${t.assignees && t.assignees.length > 0 ? t.assignees.join(', ') : '未分派成員'}`;
+          const memberInfo = t.isReadinessTask
+            ? `編派人數：${t.assignees ? t.assignees.length : 0} 人`
+            : t.isGuardTask 
+              ? `預計時間：${formatDurationSeconds(getTaskDurationSeconds(t))}` 
+              : `預計時間：${formatDurationSeconds(getTaskDurationSeconds(t))} | 參與成員：${t.assignees && t.assignees.length > 0 ? t.assignees.join(', ') : '未分派成員'}`;
 
           const coordHtml = t.coord ? `<div style="font-size:11px; color:var(--primary); font-weight:700;">📌 協調事項：${t.coord}</div>` : '';
 
@@ -2589,6 +3081,86 @@
         if (deselectAllCb) deselectAllCb.checked = !selectAll;
       };
 
+      function renderLogEvents() {
+        const container = document.getElementById('logEventList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const start = document.getElementById('logStart').value;
+        const end = document.getElementById('logEnd').value;
+
+        let filtered = majorEvents;
+        if (start && end) {
+          filtered = majorEvents.filter(e => e.date >= start && e.date <= end);
+        }
+
+        selectedLogEventIds = filtered.map(e => e.id);
+        const selectAllCb = document.getElementById('selectAllEventLogBtn');
+        const deselectAllCb = document.getElementById('deselectAllEventLogBtn');
+        if (selectAllCb) selectAllCb.checked = true;
+        if (deselectAllCb) deselectAllCb.checked = false;
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<p class="hint" style="text-align:center;">此區間無大紀事紀錄。</p>`;
+          return;
+        }
+
+        filtered.forEach(e => {
+          const card = document.createElement('div');
+          card.className = 'task-card selected-for-export';
+          card.style.borderLeftColor = e.done ? '#22c55e' : '#94a3b8';
+          card.innerHTML = `
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+              <div style="font-weight:700;">[${e.category}] ${e.date}${e.done ? '（已執行）' : ''}</div>
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer; flex-shrink:0;">
+                <span style="font-size:11px; color:var(--text-sub);">匯出</span>
+                <input type="checkbox" class="log-event-checkbox" data-event-id="${e.id}" checked onchange="toggleLogEventSelection('${e.id}', this)" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
+              </label>
+            </div>
+            <div style="font-size:12px; color:var(--text-sub); white-space:pre-line;">${e.content}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.toggleLogEventSelection = function(id, checkboxEl) {
+        const checked = checkboxEl.checked;
+        if (checked) {
+          if (!selectedLogEventIds.includes(id)) selectedLogEventIds.push(id);
+        } else {
+          selectedLogEventIds = selectedLogEventIds.filter(x => x !== id);
+        }
+        const card = checkboxEl.closest('.task-card');
+        if (card) card.classList.toggle('selected-for-export', checked);
+
+        const allBoxes = document.querySelectorAll('#logEventList .log-event-checkbox');
+        const allChecked = Array.from(allBoxes).every(cb => cb.checked);
+        const noneChecked = Array.from(allBoxes).every(cb => !cb.checked);
+        const selectAllCb = document.getElementById('selectAllEventLogBtn');
+        const deselectAllCb = document.getElementById('deselectAllEventLogBtn');
+        if (selectAllCb) selectAllCb.checked = allChecked;
+        if (deselectAllCb) deselectAllCb.checked = noneChecked;
+      };
+
+      window.toggleAllEventLogSelection = function(selectAll) {
+        const checkboxes = document.querySelectorAll('#logEventList .log-event-checkbox');
+        checkboxes.forEach(cb => {
+          cb.checked = selectAll;
+          const id = cb.dataset.eventId;
+          if (selectAll) {
+            if (!selectedLogEventIds.includes(id)) selectedLogEventIds.push(id);
+          } else {
+            selectedLogEventIds = selectedLogEventIds.filter(x => x !== id);
+          }
+          const card = cb.closest('.task-card');
+          if (card) card.classList.toggle('selected-for-export', selectAll);
+        });
+        const selectAllCb = document.getElementById('selectAllEventLogBtn');
+        const deselectAllCb = document.getElementById('deselectAllEventLogBtn');
+        if (selectAllCb) selectAllCb.checked = selectAll;
+        if (deselectAllCb) deselectAllCb.checked = !selectAll;
+      };
+
       window.exportPrintPDF = function() {
         window.print();
       };
@@ -2597,28 +3169,45 @@
         const start = document.getElementById('logStart').value;
         const end = document.getElementById('logEnd').value;
 
-        let filtered = tasks;
-        if (start && end) filtered = tasks.filter(t => t.date >= start && t.date <= end);
-        filtered = filtered.filter(t => selectedLogTaskIds.includes(t.id));
+        let filteredTasks = tasks;
+        if (start && end) filteredTasks = tasks.filter(t => t.date >= start && t.date <= end);
+        filteredTasks = filteredTasks.filter(t => selectedLogTaskIds.includes(t.id));
 
-        if (filtered.length === 0) return showToast('請至少勾選一項任務再匯出');
+        let filteredEvents = majorEvents;
+        if (start && end) filteredEvents = majorEvents.filter(e => e.date >= start && e.date <= end);
+        filteredEvents = filteredEvents.filter(e => selectedLogEventIds.includes(e.id));
+
+        if (filteredTasks.length === 0 && filteredEvents.length === 0) return showToast('請至少勾選一項內容再匯出');
 
         let text = `【排部/迫砲排 任務與衛哨發佈】(${start} ~ ${end})\n----------------------------\n`;
-        filtered.forEach((t, i) => {
-          text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
-          if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
-          if (t.coord) text += `   協調事項：${t.coord}\n`;
-          const durationText = formatDurationSeconds(getTaskDurationSeconds(t));
-          text += `   預計時間：${durationText}\n`;
-          if (!t.isGuardTask) {
-            const assigneeText = t.assignees && t.assignees.length > 0 ? t.assignees.join('、') : '未分派成員';
-            text += `   參與成員：${assigneeText}\n`;
-          }
-          text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
-        });
+
+        if (filteredTasks.length > 0) {
+          filteredTasks.forEach((t, i) => {
+            text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
+            if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
+            if (t.coord) text += `   協調事項：${t.coord}\n`;
+            const durationText = formatDurationSeconds(getTaskDurationSeconds(t));
+            text += `   預計時間：${durationText}\n`;
+            if (!t.isGuardTask) {
+              const assigneeText = t.assignees && t.assignees.length > 0 ? t.assignees.join('、') : '未分派成員';
+              text += `   參與成員：${assigneeText}\n`;
+            }
+            text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
+          });
+        } else {
+          text += `（本次無任務項目）\n\n`;
+        }
+
+        if (filteredEvents.length > 0) {
+          text += `【大紀事】\n----------------------------\n`;
+          filteredEvents.forEach((e, i) => {
+            text += `${i + 1}. [${e.category}] ${e.date}${e.done ? '（已執行）' : ''}\n`;
+            text += `   ${e.content.replace(/\n/g, '\n   ')}\n\n`;
+          });
+        }
 
         navigator.clipboard.writeText(text).then(() => {
-          showToast('任務摘要已複製到剪貼簿，可直接貼至LINE！');
+          showToast('摘要已複製到剪貼簿，可直接貼至LINE！');
         });
       };
 
@@ -2631,6 +3220,7 @@
       document.getElementById('fanStart').value = selectedDateStr;
       document.getElementById('fanEnd').value = selectedDateStr;
       document.getElementById('daoSingleDate').value = selectedDateStr;
+      document.getElementById('eventDateInput').value = selectedDateStr;
 
       renderCalendar();
       renderTaskCalendar();
@@ -2647,6 +3237,9 @@
       renderMilestones();
       renderGantt();
       renderQuarterlyView();
+      renderEventCatFilterChips();
+      renderEventList();
+      renderReadinessList();
     });
   </script>
 </body>
