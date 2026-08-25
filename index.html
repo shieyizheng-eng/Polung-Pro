@@ -2228,7 +2228,7 @@
 
         const taskPayload = {
           id: existingIdx > -1 ? tasks[existingIdx].id : 'rd_' + Date.now(),
-          title: `戰備編派 (${ms.start} ~ ${ms.end})`,
+          title: `戰備編派 (${formatDateNoYear(ms.start)} ~ ${formatDateNoYear(ms.end)})`,
           desc: desc,
           coord: '',
           date: ms.start,
@@ -3165,6 +3165,13 @@
         window.print();
       };
 
+      function formatDateNoYear(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        return `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
+      }
+
       window.exportTextSummary = function() {
         const start = document.getElementById('logStart').value;
         const end = document.getElementById('logEnd').value;
@@ -3179,11 +3186,12 @@
 
         if (filteredTasks.length === 0 && filteredEvents.length === 0) return showToast('請至少勾選一項內容再匯出');
 
-        let text = `【排部/迫砲排 任務與衛哨發佈】(${start} ~ ${end})\n----------------------------\n`;
+        let text = `【排部/迫砲排 任務與衛哨發佈】\n----------------------------\n`;
 
         if (filteredTasks.length > 0) {
           filteredTasks.forEach((t, i) => {
-            text += `${i + 1}. [${t.catName}] ${t.title} (${t.date})\n`;
+            const dateSuffix = t.isReadinessTask ? '' : ` (${formatDateNoYear(t.date)})`;
+            text += `${i + 1}. [${t.catName}] ${t.title}${dateSuffix}\n`;
             if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
             if (t.coord) text += `   協調事項：${t.coord}\n`;
             const durationText = formatDurationSeconds(getTaskDurationSeconds(t));
@@ -3201,7 +3209,7 @@
         if (filteredEvents.length > 0) {
           text += `【大紀事】\n----------------------------\n`;
           filteredEvents.forEach((e, i) => {
-            text += `${i + 1}. [${e.category}] ${e.date}${e.done ? '（已執行）' : ''}\n`;
+            text += `${i + 1}. [${e.category}] ${formatDateNoYear(e.date)}${e.done ? '（已執行）' : ''}\n`;
             text += `   ${e.content.replace(/\n/g, '\n   ')}\n\n`;
           });
         }
