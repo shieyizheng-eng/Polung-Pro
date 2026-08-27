@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
@@ -1051,6 +1053,7 @@
           if (targetTab === 'coverage') { renderMilestones(); renderGantt(); }
           if (targetTab === 'quarterly') renderQuarterlyView();
           if (targetTab === 'sketch' && sketchImgObj) resizeSketchCanvas();
+          if (targetTab === 'map') initMapIfNeeded();
         });
       });
 
@@ -2995,6 +2998,240 @@
         });
       })();
 
+      function saveMapData() {
+        localStorage.setItem('polung_map_annotations', JSON.stringify(mapAnnotations));
+        if (leafletMapObj) {
+          const c = leafletMapObj.getCenter();
+          localStorage.setItem('polung_map_center', JSON.stringify({ lat: c.lat, lng: c.lng, zoom: leafletMapObj.getZoom() }));
+        }
+      }
+
+      function buildSymbolIconDataUrl(drawFn, w, h, cx, cy) {
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        drawFn(ctx, cx, cy);
+        return canvas.toDataURL();
+      }
+
+      function createMapPointIcon(color, label) {
+        const html = `
+          <div style="position:relative;">
+            <div style="width:14px; height:14px; border-radius:50%; background:${color}; border:2px solid #fff; box-shadow:0 0 2px rgba(0,0,0,0.6);"></div>
+            ${label ? `<div style="position:absolute; left:18px; top:-4px; font-size:12px; font-weight:700; color:${color}; white-space:nowrap; text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;">${label}</div>` : ''}
+          </div>
+        `;
+        return L.divIcon({ html, className: '', iconSize: [14, 14], iconAnchor: [7, 7] });
+      }
+
+      function createMapTextIcon(text, color) {
+        const html = `<div style="font-size:13px; font-weight:700; color:${color}; white-space:nowrap; text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;">${text}</div>`;
+        return L.divIcon({ html, className: '', iconSize: [0, 0] });
+      }
+
+      function createMapUnitIcon(unitType, unitSize, color, label) {
+        const w = 80, h = 60;
+        const dataUrl = buildSymbolIconDataUrl((ctx, cx, cy) => drawUnitSymbol(ctx, cx, cy, unitType, unitSize, color, label), w, h, w / 2, 28);
+        return L.icon({ iconUrl: dataUrl, iconSize: [w, h], iconAnchor: [w / 2, 28] });
+      }
+
+      function createMapWeaponIcon(weaponType, color, label) {
+        const w = 60, h = 70;
+        const dataUrl = buildSymbolIconDataUrl((ctx, cx, cy) => drawWeaponSymbol(ctx, cx, cy, weaponType, color, label), w, h, w / 2, 25);
+        return L.icon({ iconUrl: dataUrl, iconSize: [w, h], iconAnchor: [w / 2, 25] });
+      }
+
+      function renderMapAnnotations() {
+        if (!leafletMapObj) return;
+        leafletLayerRefs.forEach(layer => leafletMapObj.removeLayer(layer));
+        leafletLayerRefs = [];
+
+        mapAnnotations.forEach(ann => {
+          let layer = null;
+          if (ann.type === 'point') {
+            layer = L.marker([ann.lat, ann.lng], { icon: createMapPointIcon(ann.color, ann.label) });
+          } else if (ann.type === 'text') {
+            layer = L.marker([ann.lat, ann.lng], { icon: createMapTextIcon(ann.text, ann.color) });
+          } else if (ann.type === 'unit') {
+            layer = L.marker([ann.lat, ann.lng], { icon: createMapUnitIcon(ann.unitType, ann.unitSize, ann.color, ann.label) });
+          } else if (ann.type === 'weapon') {
+            layer = L.marker([ann.lat, ann.lng], { icon: createMapWeaponIcon(ann.weaponType, ann.color, ann.label) });
+          } else if (ann.type === 'line' || ann.type === 'freehand') {
+            layer = L.polyline(ann.latlngs, { color: ann.color, weight: 3 });
+          }
+          if (layer) {
+            layer.addTo(leafletMapObj);
+            leafletLayerRefs.push(layer);
+          }
+        });
+      }
+
+      function eraseNearestMapAnnotation(clickLatLng) {
+        if (!leafletMapObj || mapAnnotations.length === 0) return;
+        const clickPt = leafletMapObj.latLngToContainerPoint(clickLatLng);
+        let nearestIdx = -1, nearestPixelDist = Infinity;
+
+        mapAnnotations.forEach((ann, idx) => {
+          let dist = Infinity;
+          if (ann.latlngs) {
+            ann.latlngs.forEach(([la, lo]) => {
+              const pt = leafletMapObj.latLngToContainerPoint([la, lo]);
+              dist = Math.min(dist, clickPt.distanceTo(pt));
+            });
+          } else {
+            const pt = leafletMapObj.latLngToContainerPoint([ann.lat, ann.lng]);
+            dist = clickPt.distanceTo(pt);
+          }
+          if (dist < nearestPixelDist) { nearestPixelDist = dist; nearestIdx = idx; }
+        });
+
+        if (nearestIdx > -1 && nearestPixelDist < 30) {
+          mapAnnotations.splice(nearestIdx, 1);
+          saveMapData();
+          renderMapAnnotations();
+        }
+      }
+
+      function initMapIfNeeded() {
+        if (mapInitialized) {
+          setTimeout(() => leafletMapObj && leafletMapObj.invalidateSize(), 100);
+          return;
+        }
+        if (typeof L === 'undefined') {
+          showToast('地圖函式庫載入失敗，請確認網路連線後重新整理');
+          return;
+        }
+
+        const savedCenter = JSON.parse(localStorage.getItem('polung_map_center')) || { lat: 23.6, lng: 121.0, zoom: 8 };
+        leafletMapObj = L.map('leafletMapContainer').setView([savedCenter.lat, savedCenter.lng], savedCenter.zoom || 8);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap 貢獻者'
+        }).addTo(leafletMapObj);
+
+        mapInitialized = true;
+        renderMapAnnotations();
+
+        leafletMapObj.on('click', (e) => {
+          if (mapTool === 'point') {
+            const label = prompt('請輸入標點文字（可留空）：', '') || '';
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'point', lat: e.latlng.lat, lng: e.latlng.lng, color: mapColor, label });
+            saveMapData(); renderMapAnnotations();
+          } else if (mapTool === 'text') {
+            const text = prompt('請輸入文字內容：', '');
+            if (text) {
+              mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'text', lat: e.latlng.lat, lng: e.latlng.lng, text, color: mapColor });
+              saveMapData(); renderMapAnnotations();
+            }
+          } else if (mapTool === 'unit') {
+            const label = prompt('請輸入單位番號/名稱（可留空）：', '') || '';
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'unit', lat: e.latlng.lat, lng: e.latlng.lng, unitType: mapUnitType, unitSize: mapUnitSize, color: mapColor, label });
+            saveMapData(); renderMapAnnotations();
+          } else if (mapTool === 'weapon') {
+            const label = prompt('請輸入番號/位置標註（可留空）：', '') || '';
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'weapon', lat: e.latlng.lat, lng: e.latlng.lng, weaponType: mapWeaponType, color: mapColor, label });
+            saveMapData(); renderMapAnnotations();
+          } else if (mapTool === 'erase') {
+            eraseNearestMapAnnotation(e.latlng);
+          }
+        });
+
+        leafletMapObj.on('mousedown', (e) => {
+          if (mapTool === 'line') {
+            leafletMapObj.dragging.disable();
+            mapIsDrawing = true;
+            mapLineStart = e.latlng;
+          } else if (mapTool === 'freehand') {
+            leafletMapObj.dragging.disable();
+            mapIsDrawing = true;
+            mapFreehandLatLngs = [e.latlng];
+          }
+        });
+
+        let mapTempLayer = null;
+        leafletMapObj.on('mousemove', (e) => {
+          if (!mapIsDrawing) return;
+          if (mapTool === 'line' && mapLineStart) {
+            if (mapTempLayer) leafletMapObj.removeLayer(mapTempLayer);
+            mapTempLayer = L.polyline([mapLineStart, e.latlng], { color: mapColor, weight: 3, dashArray: '4' }).addTo(leafletMapObj);
+          } else if (mapTool === 'freehand' && mapFreehandLatLngs) {
+            mapFreehandLatLngs.push(e.latlng);
+            if (mapTempLayer) leafletMapObj.removeLayer(mapTempLayer);
+            mapTempLayer = L.polyline(mapFreehandLatLngs, { color: mapColor, weight: 3 }).addTo(leafletMapObj);
+          }
+        });
+
+        leafletMapObj.on('mouseup', (e) => {
+          if (!mapIsDrawing) return;
+          mapIsDrawing = false;
+          leafletMapObj.dragging.enable();
+          if (mapTempLayer) { leafletMapObj.removeLayer(mapTempLayer); mapTempLayer = null; }
+
+          if (mapTool === 'line' && mapLineStart) {
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'line', latlngs: [[mapLineStart.lat, mapLineStart.lng], [e.latlng.lat, e.latlng.lng]], color: mapColor });
+            mapLineStart = null;
+            saveMapData(); renderMapAnnotations();
+          } else if (mapTool === 'freehand' && mapFreehandLatLngs && mapFreehandLatLngs.length > 1) {
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'freehand', latlngs: mapFreehandLatLngs.map(ll => [ll.lat, ll.lng]), color: mapColor });
+            mapFreehandLatLngs = null;
+            saveMapData(); renderMapAnnotations();
+          }
+        });
+
+        setTimeout(() => leafletMapObj.invalidateSize(), 100);
+      }
+
+      function renderMapUnitPickers() {
+        const typeContainer = document.getElementById('mapUnitTypeChips');
+        if (!typeContainer) return;
+        typeContainer.innerHTML = sketchUnitTypes.map(u => `<button type="button" class="chip-btn ${mapUnitType === u.key ? 'active' : ''}" onclick="setMapUnitType('${u.key}')">${u.label}</button>`).join('');
+
+        const sizeContainer = document.getElementById('mapUnitSizeChips');
+        sizeContainer.innerHTML = sketchUnitSizes.map(s => `<button type="button" class="chip-btn ${mapUnitSize === s.key ? 'active' : ''}" onclick="setMapUnitSize('${s.key}')">${s.label}</button>`).join('');
+      }
+      window.setMapUnitType = function(key) { mapUnitType = key; renderMapUnitPickers(); };
+      window.setMapUnitSize = function(key) { mapUnitSize = key; renderMapUnitPickers(); };
+
+      function renderMapWeaponPicker() {
+        const container = document.getElementById('mapWeaponTypeChips');
+        if (!container) return;
+        container.innerHTML = sketchWeaponTypes.map(w => `<button type="button" class="chip-btn ${mapWeaponType === w.key ? 'active' : ''}" onclick="setMapWeaponType('${w.key}')">${w.label}</button>`).join('');
+      }
+      window.setMapWeaponType = function(key) { mapWeaponType = key; renderMapWeaponPicker(); };
+
+      function renderMapColorPicker() {
+        const container = document.getElementById('mapColorPicker');
+        if (!container) return;
+        container.innerHTML = sketchColors.map(c => `<button type="button" onclick="setMapColor('${c}')" style="width:28px; height:28px; border-radius:6px; background:${c}; border:${mapColor === c ? '3px solid var(--primary)' : '1px solid var(--border-color)'}; cursor:pointer;"></button>`).join('');
+      }
+      window.setMapColor = function(c) { mapColor = c; renderMapColorPicker(); };
+
+      document.querySelectorAll('.map-tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          mapTool = btn.dataset.tool;
+          document.getElementById('mapUnitPicker').style.display = mapTool === 'unit' ? 'block' : 'none';
+          document.getElementById('mapWeaponPicker').style.display = mapTool === 'weapon' ? 'block' : 'none';
+        });
+      });
+
+      document.getElementById('mapUndoBtn').addEventListener('click', () => {
+        mapAnnotations.pop();
+        saveMapData();
+        renderMapAnnotations();
+      });
+
+      document.getElementById('mapClearBtn').addEventListener('click', () => {
+        if (confirm('確定要清除地圖上所有標記嗎？')) {
+          mapAnnotations = [];
+          saveMapData();
+          renderMapAnnotations();
+          showToast('已清除所有地圖標記');
+        }
+      });
+
       document.getElementById('addMilestoneBtn').addEventListener('click', () => {
         const cat = document.getElementById('milestoneCatSelect').value;
         const start = document.getElementById('milestoneStart').value;
@@ -3981,6 +4218,9 @@
       renderSketchWeaponPicker();
       renderSketchColorPicker();
       loadSketchImageAndRender();
+      renderMapUnitPickers();
+      renderMapWeaponPicker();
+      renderMapColorPicker();
     });
   </script>
 </body>
