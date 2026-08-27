@@ -625,7 +625,48 @@
         </div>
       </section>
 
-      <!-- Panel: 大紀事 -->
+      <!-- Panel: 標圖 -->
+      <section id="tab-sketch" class="panel">
+        <h2>標圖工具</h2>
+        <div class="form-group">
+          <input type="file" id="sketchImageInput" accept="image/*" style="margin-bottom:8px; color:var(--text-main);" />
+          <p class="hint" style="margin-top:0;">上傳一張底圖（如射擊圖板、等高線圖、營區平面圖），即可在圖上標點、拉線、標文字、自由繪圖，或標示部隊符號。底圖與標圖內容會永久保存在本機，完全離線運作。</p>
+        </div>
+
+        <div class="form-group" id="sketchToolbar" style="display:none;">
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:8px;">
+            <button type="button" class="toggle-btn sketch-tool-btn active" data-tool="point">📍 標點</button>
+            <button type="button" class="toggle-btn sketch-tool-btn" data-tool="line">📏 拉線</button>
+            <button type="button" class="toggle-btn sketch-tool-btn" data-tool="text">🔤 文字</button>
+            <button type="button" class="toggle-btn sketch-tool-btn" data-tool="freehand">✏️ 自由繪圖</button>
+            <button type="button" class="toggle-btn sketch-tool-btn" data-tool="unit">🎖️ 部隊符號</button>
+            <button type="button" class="toggle-btn sketch-tool-btn" data-tool="erase">🧹 擦除</button>
+          </div>
+
+          <div id="sketchUnitPicker" style="display:none; margin-bottom:10px; background:var(--bg-color); border-radius:10px; padding:8px; border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">兵科：</div>
+            <div id="sketchUnitTypeChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+            <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">單位規模（營以下）：</div>
+            <div id="sketchUnitSizeChips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+            <span style="font-size:12px; font-weight:700;">顏色：</span>
+            <div id="sketchColorPicker" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+            <button type="button" id="sketchUndoBtn" class="btn btn-ghost"><i class="fa-solid fa-rotate-left"></i> 復原</button>
+            <button type="button" id="sketchClearBtn" class="btn btn-ghost"><i class="fa-solid fa-trash"></i> 清除全部</button>
+            <button type="button" id="sketchChangeImageBtn" class="btn btn-ghost"><i class="fa-solid fa-image"></i> 更換底圖</button>
+          </div>
+        </div>
+
+        <div id="sketchCanvasWrap" style="display:none; margin-top:12px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); background:var(--card-bg);">
+          <canvas id="sketchCanvas" style="width:100%; display:block; touch-action:none;"></canvas>
+        </div>
+      </section>
+
       <section id="tab-events" class="panel">
         <h2 id="eventFormTitle">新增大紀事</h2>
         <div class="form-group">
@@ -707,6 +748,7 @@
       <button class="nav-item" data-tab="coverage"><i class="fa-solid fa-chart-line"></i><span>戰力比</span></button>
       <button class="nav-item" data-tab="readiness"><i class="fa-solid fa-shield-heart"></i><span>戰備</span></button>
       <button class="nav-item" data-tab="quarterly"><i class="fa-solid fa-calendar-week"></i><span>季度</span></button>
+      <button class="nav-item" data-tab="sketch"><i class="fa-solid fa-map-location-dot"></i><span>標圖</span></button>
       <button class="nav-item" data-tab="events"><i class="fa-solid fa-clipboard-list"></i><span>大紀事</span></button>
       <button class="nav-item" data-tab="log"><i class="fa-solid fa-book"></i><span>日誌</span></button>
     </nav>
@@ -731,6 +773,25 @@
       { dept: '二砲', roles: ['砲長', '砲副', '裝填', '整備', '彈藥'] },
       { dept: '射指', roles: ['組長', '水平', '話務'] }
     ];
+
+    const sketchUnitTypes = [
+      { key: 'infantry', label: '步兵' },
+      { key: 'artillery', label: '砲兵' },
+      { key: 'mortar', label: '迫砲' },
+      { key: 'armor', label: '裝甲' },
+      { key: 'engineer', label: '工兵' },
+      { key: 'signal', label: '通信' },
+      { key: 'hq', label: '指揮' }
+    ];
+
+    const sketchUnitSizes = [
+      { key: 'squad', label: '班', dots: 1, bars: 0 },
+      { key: 'platoon', label: '排', dots: 3, bars: 0 },
+      { key: 'company', label: '連', dots: 0, bars: 1 },
+      { key: 'battalion', label: '營', dots: 0, bars: 2 }
+    ];
+
+    const sketchColors = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#000000', '#ffffff'];
 
     const milestoneColorMap = {
       '基地': 'rgba(239, 68, 68, 0.45)',
@@ -834,6 +895,18 @@
       let selectedLogEventIds = [];
       let editingReadinessId = null;
 
+      let sketchImageData = localStorage.getItem('polung_sketch_image') || null;
+      let sketchAnnotations = JSON.parse(localStorage.getItem('polung_sketch_annotations')) || [];
+      let sketchTool = 'point';
+      let sketchColor = '#ef4444';
+      let sketchUnitType = 'infantry';
+      let sketchUnitSize = 'squad';
+      let sketchImgObj = null;
+      let sketchIsDrawing = false;
+      let sketchLineStart = null;
+      let sketchFreehandPoints = null;
+      let sketchTempAnnotation = null;
+
       let leaveCollapsed = { fan: false, dao: false, taskCat: true };
 
       let guardMode = 'guard';
@@ -896,6 +969,7 @@
           if (targetTab === 'warno') { renderWarnos(); }
           if (targetTab === 'coverage') { renderMilestones(); renderGantt(); }
           if (targetTab === 'quarterly') renderQuarterlyView();
+          if (targetTab === 'sketch' && sketchImgObj) resizeSketchCanvas();
         });
       });
 
@@ -1609,12 +1683,12 @@
         let summaryHtml = `
           <div class="guard-grid-layout">
             <div class="guard-col">
-              <div class="guard-col-title">【衛哨勤務】</div>
-              ${guardRows || '<div style="color:var(--text-sub);">無</div>'}
-            </div>
-            <div class="guard-col">
               <div class="guard-col-title">【安官勤務】</div>
               ${safeRows || '<div style="color:var(--text-sub);">無</div>'}
+            </div>
+            <div class="guard-col">
+              <div class="guard-col-title">【衛哨勤務】</div>
+              ${guardRows || '<div style="color:var(--text-sub);">無</div>'}
             </div>
           </div>
         `;
@@ -2199,10 +2273,16 @@
       function buildReadinessDesc(positions) {
         let lines = [];
         readinessPositions.forEach(group => {
-          const roleLines = group.roles
-            .map(role => `${role}：${positions[`${group.dept}-${role}`] || '未指派'}`)
-            .join('、');
-          lines.push(`【${group.dept}】${roleLines}`);
+          const bracket = `【${group.dept}】`;
+          const indent = '　'.repeat(bracket.length);
+          group.roles.forEach((role, idx) => {
+            const val = positions[`${group.dept}-${role}`] || '未指派';
+            if (idx === 0) {
+              lines.push(`${bracket}${role}：${val}`);
+            } else {
+              lines.push(`${indent}${role}：${val}`);
+            }
+          });
         });
         return lines.join('\n');
       }
@@ -2314,6 +2394,395 @@
           container.appendChild(card);
         });
       }
+
+      function saveSketchData() {
+        try {
+          if (sketchImageData) localStorage.setItem('polung_sketch_image', sketchImageData);
+          localStorage.setItem('polung_sketch_annotations', JSON.stringify(sketchAnnotations));
+        } catch (err) {
+          showToast('儲存失敗，可能是圖片太大或裝置儲存空間不足');
+        }
+      }
+
+      function getSketchCanvas() {
+        return document.getElementById('sketchCanvas');
+      }
+
+      function loadSketchImageAndRender() {
+        const toolbar = document.getElementById('sketchToolbar');
+        const canvasWrap = document.getElementById('sketchCanvasWrap');
+        if (!sketchImageData) {
+          toolbar.style.display = 'none';
+          canvasWrap.style.display = 'none';
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          sketchImgObj = img;
+          toolbar.style.display = 'block';
+          canvasWrap.style.display = 'block';
+          resizeSketchCanvas();
+        };
+        img.src = sketchImageData;
+      }
+
+      function resizeSketchCanvas() {
+        if (!sketchImgObj) return;
+        const canvas = getSketchCanvas();
+        const wrap = document.getElementById('sketchCanvasWrap');
+        const displayW = wrap.clientWidth;
+        const ratio = sketchImgObj.naturalHeight / sketchImgObj.naturalWidth;
+        const displayH = Math.round(displayW * ratio);
+        canvas.width = displayW;
+        canvas.height = displayH;
+        canvas.style.height = `${displayH}px`;
+        renderSketchCanvas();
+      }
+
+      function drawUnitSymbol(ctx, x, y, unitType, unitSizeKey, color, label) {
+        const FW = 44, FH = 28;
+        const left = x - FW / 2, top = y - FH / 2;
+
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.rect(left, top, FW, FH);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
+        const cx = x, cy = y;
+
+        switch (unitType) {
+          case 'infantry':
+            ctx.beginPath();
+            ctx.moveTo(left + 6, top + 4); ctx.lineTo(left + FW - 6, top + FH - 4);
+            ctx.moveTo(left + FW - 6, top + 4); ctx.lineTo(left + 6, top + FH - 4);
+            ctx.stroke();
+            break;
+          case 'artillery':
+            ctx.beginPath();
+            ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 'mortar':
+            ctx.beginPath();
+            ctx.arc(cx, top + FH - 8, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(cx, top + FH - 13); ctx.lineTo(cx, top + 3);
+            ctx.stroke();
+            break;
+          case 'armor':
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, FW / 2 - 6, FH / 2 - 5, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            break;
+          case 'engineer':
+            ctx.beginPath();
+            ctx.moveTo(left + 6, top + FH - 4); ctx.lineTo(left + FW - 6, top + 4);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(left + 8, cy); ctx.lineTo(left + FW - 8, cy);
+            ctx.stroke();
+            break;
+          case 'signal':
+            ctx.beginPath();
+            ctx.moveTo(cx - 4, top + 4);
+            ctx.lineTo(cx + 4, cy - 2);
+            ctx.lineTo(cx - 2, cy - 2);
+            ctx.lineTo(cx + 4, top + FH - 4);
+            ctx.stroke();
+            break;
+          case 'hq':
+            ctx.beginPath();
+            ctx.moveTo(left, top + FH / 2);
+            ctx.lineTo(left - 14, top + FH / 2);
+            ctx.stroke();
+            break;
+        }
+
+        const sizeDef = sketchUnitSizes.find(s => s.key === unitSizeKey);
+        if (sizeDef) {
+          const sy = top - 8;
+          if (sizeDef.dots > 0) {
+            const spacing = 8;
+            const totalW = (sizeDef.dots - 1) * spacing;
+            const startX = cx - totalW / 2;
+            for (let i = 0; i < sizeDef.dots; i++) {
+              ctx.beginPath();
+              ctx.arc(startX + i * spacing, sy, 2.5, 0, Math.PI * 2);
+              ctx.fillStyle = color;
+              ctx.fill();
+            }
+          } else if (sizeDef.bars > 0) {
+            const spacing = 6;
+            const totalW = (sizeDef.bars - 1) * spacing;
+            const startX = cx - totalW / 2;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < sizeDef.bars; i++) {
+              ctx.beginPath();
+              ctx.moveTo(startX + i * spacing, sy - 4);
+              ctx.lineTo(startX + i * spacing, sy + 4);
+              ctx.stroke();
+            }
+          }
+        }
+
+        if (label) {
+          ctx.fillStyle = color;
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, cx, top + FH + 13);
+        }
+      }
+
+      function drawSketchAnnotation(ctx, ann, cw, ch) {
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (ann.type === 'point') {
+          const x = ann.x * cw, y = ann.y * ch;
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = ann.color;
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          if (ann.label) {
+            ctx.fillStyle = ann.color;
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(ann.label, x + 10, y + 4);
+          }
+        } else if (ann.type === 'line') {
+          ctx.beginPath();
+          ctx.moveTo(ann.x1 * cw, ann.y1 * ch);
+          ctx.lineTo(ann.x2 * cw, ann.y2 * ch);
+          ctx.strokeStyle = ann.color;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        } else if (ann.type === 'text') {
+          ctx.fillStyle = ann.color;
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(ann.text, ann.x * cw, ann.y * ch);
+        } else if (ann.type === 'freehand') {
+          if (!ann.points || ann.points.length < 2) return;
+          ctx.beginPath();
+          ctx.moveTo(ann.points[0].x * cw, ann.points[0].y * ch);
+          for (let i = 1; i < ann.points.length; i++) ctx.lineTo(ann.points[i].x * cw, ann.points[i].y * ch);
+          ctx.strokeStyle = ann.color;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        } else if (ann.type === 'unit') {
+          drawUnitSymbol(ctx, ann.x * cw, ann.y * ch, ann.unitType, ann.unitSize, ann.color, ann.label);
+        }
+      }
+
+      function renderSketchCanvas() {
+        const canvas = getSketchCanvas();
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (sketchImgObj) ctx.drawImage(sketchImgObj, 0, 0, canvas.width, canvas.height);
+
+        sketchAnnotations.forEach(ann => drawSketchAnnotation(ctx, ann, canvas.width, canvas.height));
+        if (sketchTempAnnotation) drawSketchAnnotation(ctx, sketchTempAnnotation, canvas.width, canvas.height);
+      }
+
+      function getSketchRelativePos(e) {
+        const canvas = getSketchCanvas();
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const x = (clientX - rect.left) / rect.width;
+        const y = (clientY - rect.top) / rect.height;
+        return { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+      }
+
+      function eraseNearestSketchAnnotation(pos) {
+        if (sketchAnnotations.length === 0) return;
+        let nearestIdx = -1;
+        let nearestDist = Infinity;
+
+        sketchAnnotations.forEach((ann, idx) => {
+          let dist = Infinity;
+          if (ann.type === 'point' || ann.type === 'text' || ann.type === 'unit') {
+            dist = Math.hypot(ann.x - pos.x, ann.y - pos.y);
+          } else if (ann.type === 'line') {
+            dist = Math.min(Math.hypot(ann.x1 - pos.x, ann.y1 - pos.y), Math.hypot(ann.x2 - pos.x, ann.y2 - pos.y));
+          } else if (ann.type === 'freehand' && ann.points) {
+            ann.points.forEach(p => { dist = Math.min(dist, Math.hypot(p.x - pos.x, p.y - pos.y)); });
+          }
+          if (dist < nearestDist) { nearestDist = dist; nearestIdx = idx; }
+        });
+
+        if (nearestIdx > -1 && nearestDist < 0.05) {
+          sketchAnnotations.splice(nearestIdx, 1);
+          saveSketchData();
+          renderSketchCanvas();
+        }
+      }
+
+      function renderSketchUnitPickers() {
+        const typeContainer = document.getElementById('sketchUnitTypeChips');
+        typeContainer.innerHTML = sketchUnitTypes.map(u => `<button type="button" class="chip-btn ${sketchUnitType === u.key ? 'active' : ''}" onclick="setSketchUnitType('${u.key}')">${u.label}</button>`).join('');
+
+        const sizeContainer = document.getElementById('sketchUnitSizeChips');
+        sizeContainer.innerHTML = sketchUnitSizes.map(s => `<button type="button" class="chip-btn ${sketchUnitSize === s.key ? 'active' : ''}" onclick="setSketchUnitSize('${s.key}')">${s.label}</button>`).join('');
+      }
+
+      window.setSketchUnitType = function(key) { sketchUnitType = key; renderSketchUnitPickers(); };
+      window.setSketchUnitSize = function(key) { sketchUnitSize = key; renderSketchUnitPickers(); };
+
+      function renderSketchColorPicker() {
+        const container = document.getElementById('sketchColorPicker');
+        container.innerHTML = sketchColors.map(c => `<button type="button" onclick="setSketchColor('${c}')" style="width:28px; height:28px; border-radius:6px; background:${c}; border:${sketchColor === c ? '3px solid var(--primary)' : '1px solid var(--border-color)'}; cursor:pointer;"></button>`).join('');
+      }
+      window.setSketchColor = function(c) { sketchColor = c; renderSketchColorPicker(); };
+
+      document.getElementById('sketchImageInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const MAX_DIM = 1600;
+            let w = img.naturalWidth, h = img.naturalHeight;
+            if (w > MAX_DIM || h > MAX_DIM) {
+              const scale = Math.min(MAX_DIM / w, MAX_DIM / h);
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = w; offCanvas.height = h;
+            const offCtx = offCanvas.getContext('2d');
+            offCtx.drawImage(img, 0, 0, w, h);
+
+            sketchImageData = offCanvas.toDataURL('image/jpeg', 0.85);
+            sketchAnnotations = [];
+            saveSketchData();
+            loadSketchImageAndRender();
+            showToast('底圖已上傳並儲存！');
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.querySelectorAll('.sketch-tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.sketch-tool-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          sketchTool = btn.dataset.tool;
+          document.getElementById('sketchUnitPicker').style.display = sketchTool === 'unit' ? 'block' : 'none';
+        });
+      });
+
+      document.getElementById('sketchUndoBtn').addEventListener('click', () => {
+        sketchAnnotations.pop();
+        saveSketchData();
+        renderSketchCanvas();
+      });
+
+      document.getElementById('sketchClearBtn').addEventListener('click', () => {
+        if (confirm('確定要清除畫面上所有標圖內容嗎？（底圖會保留）')) {
+          sketchAnnotations = [];
+          saveSketchData();
+          renderSketchCanvas();
+          showToast('已清除所有標圖內容');
+        }
+      });
+
+      document.getElementById('sketchChangeImageBtn').addEventListener('click', () => {
+        document.getElementById('sketchImageInput').click();
+      });
+
+      window.addEventListener('resize', () => {
+        if (sketchImgObj && document.getElementById('tab-sketch').classList.contains('active')) resizeSketchCanvas();
+      });
+
+      const sketchCanvasEl = getSketchCanvas();
+
+      sketchCanvasEl.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const pos = getSketchRelativePos(e);
+
+        if (sketchTool === 'point') {
+          const label = prompt('請輸入標點文字（可留空）：', '') || '';
+          sketchAnnotations.push({ id: 'sk_' + Date.now(), type: 'point', x: pos.x, y: pos.y, color: sketchColor, label });
+          saveSketchData();
+          renderSketchCanvas();
+        } else if (sketchTool === 'text') {
+          const text = prompt('請輸入文字內容：', '');
+          if (text) {
+            sketchAnnotations.push({ id: 'sk_' + Date.now(), type: 'text', x: pos.x, y: pos.y, text, color: sketchColor });
+            saveSketchData();
+            renderSketchCanvas();
+          }
+        } else if (sketchTool === 'unit') {
+          const label = prompt('請輸入單位番號/名稱（可留空）：', '') || '';
+          sketchAnnotations.push({ id: 'sk_' + Date.now(), type: 'unit', x: pos.x, y: pos.y, unitType: sketchUnitType, unitSize: sketchUnitSize, color: sketchColor, label });
+          saveSketchData();
+          renderSketchCanvas();
+        } else if (sketchTool === 'erase') {
+          eraseNearestSketchAnnotation(pos);
+        } else if (sketchTool === 'line') {
+          sketchLineStart = pos;
+          sketchIsDrawing = true;
+        } else if (sketchTool === 'freehand') {
+          sketchFreehandPoints = [pos];
+          sketchIsDrawing = true;
+        }
+      });
+
+      sketchCanvasEl.addEventListener('pointermove', (e) => {
+        if (!sketchIsDrawing) return;
+        e.preventDefault();
+        const pos = getSketchRelativePos(e);
+
+        if (sketchTool === 'line' && sketchLineStart) {
+          sketchTempAnnotation = { type: 'line', x1: sketchLineStart.x, y1: sketchLineStart.y, x2: pos.x, y2: pos.y, color: sketchColor };
+          renderSketchCanvas();
+        } else if (sketchTool === 'freehand' && sketchFreehandPoints) {
+          sketchFreehandPoints.push(pos);
+          sketchTempAnnotation = { type: 'freehand', points: sketchFreehandPoints, color: sketchColor };
+          renderSketchCanvas();
+        }
+      });
+
+      sketchCanvasEl.addEventListener('pointerup', () => {
+        if (!sketchIsDrawing) return;
+        sketchIsDrawing = false;
+
+        if (sketchTool === 'line' && sketchLineStart && sketchTempAnnotation) {
+          sketchAnnotations.push({ id: 'sk_' + Date.now(), type: 'line', x1: sketchTempAnnotation.x1, y1: sketchTempAnnotation.y1, x2: sketchTempAnnotation.x2, y2: sketchTempAnnotation.y2, color: sketchColor });
+          sketchLineStart = null;
+          sketchTempAnnotation = null;
+          saveSketchData();
+          renderSketchCanvas();
+        } else if (sketchTool === 'freehand' && sketchFreehandPoints && sketchFreehandPoints.length > 1) {
+          sketchAnnotations.push({ id: 'sk_' + Date.now(), type: 'freehand', points: sketchFreehandPoints, color: sketchColor });
+          sketchFreehandPoints = null;
+          sketchTempAnnotation = null;
+          saveSketchData();
+          renderSketchCanvas();
+        }
+      });
+
+      sketchCanvasEl.addEventListener('pointercancel', () => {
+        sketchIsDrawing = false;
+        sketchTempAnnotation = null;
+        sketchFreehandPoints = null;
+        sketchLineStart = null;
+      });
 
       document.getElementById('addMilestoneBtn').addEventListener('click', () => {
         const cat = document.getElementById('milestoneCatSelect').value;
@@ -2433,7 +2902,10 @@
             });
             container.innerHTML += `
               <div class="dept-block">
-                <div class="dept-block-header"><span>${dName}</span></div>
+                <div class="dept-block-header">
+                  <span>${dName}</span>
+                  <button type="button" class="btn-toggle-icon" style="padding:2px 6px; font-size:10px;" onclick="batchSelectEligibilityDept('${dName}')">全選/全撤</button>
+                </div>
                 <div class="assignee-chips">${chips}</div>
               </div>
             `;
@@ -2446,6 +2918,16 @@
         if (!m) return;
         const fieldKey = eligibilityTab === 'safe' ? 'eligibleSafe' : 'eligibleGuard';
         m[fieldKey] = m[fieldKey] === false ? true : false;
+        saveData();
+        renderEligibilityChips();
+        renderGuardSlots();
+      };
+
+      window.batchSelectEligibilityDept = function(dName) {
+        const fieldKey = eligibilityTab === 'safe' ? 'eligibleSafe' : 'eligibleGuard';
+        const deptMembers = members.filter(m => m.dept === dName);
+        const allEligible = deptMembers.every(m => m[fieldKey] !== false);
+        deptMembers.forEach(m => { m[fieldKey] = allEligible ? false : true; });
         saveData();
         renderEligibilityChips();
         renderGuardSlots();
@@ -2495,7 +2977,10 @@
             });
             filterContainer.innerHTML += `
               <div class="dept-block">
-                <div class="dept-block-header"><span>${dName}</span></div>
+                <div class="dept-block-header">
+                  <span>${dName}</span>
+                  <button type="button" class="btn-toggle-icon" style="padding:2px 6px; font-size:10px;" onclick="batchSelectGanttFilterDept('${dName}')">全選/全撤</button>
+                </div>
                 <div class="assignee-chips">${filterChips}</div>
               </div>
             `;
@@ -2544,6 +3029,14 @@
       window.toggleGanttFilter = function(name) {
         if (filterGanttMembers.includes(name)) filterGanttMembers = filterGanttMembers.filter(x => x !== name);
         else filterGanttMembers.push(name);
+        renderGantt();
+      };
+
+      window.batchSelectGanttFilterDept = function(dName) {
+        const deptM = members.filter(m => m.dept === dName).map(m => m.name);
+        const allSel = deptM.every(n => filterGanttMembers.includes(n));
+        if (allSel) filterGanttMembers = filterGanttMembers.filter(n => !deptM.includes(n));
+        else deptM.forEach(n => { if (!filterGanttMembers.includes(n)) filterGanttMembers.push(n); });
         renderGantt();
       };
 
@@ -3192,13 +3685,23 @@
           filteredTasks.forEach((t, i) => {
             const dateSuffix = t.isReadinessTask ? '' : ` (${formatDateNoYear(t.date)})`;
             text += `${i + 1}. [${t.catName}] ${t.title}${dateSuffix}\n`;
-            if (t.desc) text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
+            if (t.desc) {
+              if (t.isReadinessTask) {
+                text += `   說明：\n${t.desc}\n`;
+              } else {
+                text += `   說明：${t.desc.replace(/<[^>]*>?/gm, '')}\n`;
+              }
+            }
             if (t.coord) text += `   協調事項：${t.coord}\n`;
-            const durationText = formatDurationSeconds(getTaskDurationSeconds(t));
-            text += `   預計時間：${durationText}\n`;
-            if (!t.isGuardTask) {
-              const assigneeText = t.assignees && t.assignees.length > 0 ? t.assignees.join('、') : '未分派成員';
-              text += `   參與成員：${assigneeText}\n`;
+            if (t.isReadinessTask) {
+              text += `   編派人數：${t.assignees ? t.assignees.length : 0} 人\n`;
+            } else {
+              const durationText = formatDurationSeconds(getTaskDurationSeconds(t));
+              text += `   預計時間：${durationText}\n`;
+              if (!t.isGuardTask) {
+                const assigneeText = t.assignees && t.assignees.length > 0 ? t.assignees.join('、') : '未分派成員';
+                text += `   參與成員：${assigneeText}\n`;
+              }
             }
             text += `   狀態：${t.status} | 檢核人：${t.checker}\n\n`;
           });
@@ -3248,6 +3751,9 @@
       renderEventCatFilterChips();
       renderEventList();
       renderReadinessList();
+      renderSketchUnitPickers();
+      renderSketchColorPicker();
+      loadSketchImageAndRender();
     });
   </script>
 </body>
