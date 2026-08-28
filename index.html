@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mgrs"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
@@ -678,45 +679,42 @@
       </section>
 
       <!-- Panel: 地圖 -->
-      <section id="tab-map" class="panel">
-        <h2>連線地圖標圖</h2>
-        <p class="hint" style="margin-top:0;">使用 OpenStreetMap 開源圖層，需要網路連線才能顯示地圖底圖。若無網路，建議改用「標圖」分頁的離線靜態底圖工具。</p>
-
-        <div class="form-group" id="mapToolbar">
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:8px;">
-            <button type="button" class="toggle-btn map-tool-btn active" data-tool="point">📍 標點</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="line">📏 拉線</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="text">🔤 文字</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="freehand">✏️ 自由繪圖</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="unit">🎖️ 部隊符號</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="weapon">🎯 武器兵棋</button>
-            <button type="button" class="toggle-btn map-tool-btn" data-tool="erase">🧹 擦除</button>
-          </div>
-
-          <div id="mapUnitPicker" style="display:none; margin-bottom:10px; background:var(--bg-color); border-radius:10px; padding:8px; border:1px solid var(--border-color);">
-            <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">兵科：</div>
-            <div id="mapUnitTypeChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
-            <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">單位規模（營以下）：</div>
-            <div id="mapUnitSizeChips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-          </div>
-
-          <div id="mapWeaponPicker" style="display:none; margin-bottom:10px; background:var(--bg-color); border-radius:10px; padding:8px; border:1px solid var(--border-color);">
-            <div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">武器類型：</div>
-            <div id="mapWeaponTypeChips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-          </div>
-
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-            <span style="font-size:12px; font-weight:700;">顏色：</span>
-            <div id="mapColorPicker" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-          </div>
-
-          <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px;">
-            <button type="button" id="mapUndoBtn" class="btn btn-ghost"><i class="fa-solid fa-rotate-left"></i> 復原</button>
-            <button type="button" id="mapClearBtn" class="btn btn-ghost"><i class="fa-solid fa-trash"></i> 清除全部</button>
-          </div>
+      <section id="tab-map" class="panel" style="padding:0;">
+        <div style="padding:16px 16px 8px;">
+          <h2 style="margin-bottom:4px;">連線地圖標圖</h2>
+          <p class="hint" style="margin-top:0; margin-bottom:0;">單擊查看座標（MGRS/UTM/標高），長按空白處新增標記；點選已存在的標記可刪除。需要網路顯示底圖，離線時建議改用「標圖」分頁。</p>
         </div>
 
-        <div id="leafletMapContainer" style="height:420px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); margin-top:12px;"></div>
+        <div style="position:relative; margin:8px 16px 16px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); height:calc(100vh - 280px); min-height:480px;">
+          <div id="leafletMapContainer" style="width:100%; height:100%;"></div>
+
+          <button type="button" id="mapSettingsToggleBtn" style="position:absolute; top:10px; right:10px; z-index:1000; width:42px; height:42px; border-radius:10px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--primary); font-size:18px; box-shadow:0 2px 6px rgba(0,0,0,0.3); cursor:pointer;">
+            <i class="fa-solid fa-layer-group"></i>
+          </button>
+
+          <div id="mapDrawModeBanner" style="display:none; position:absolute; top:10px; left:10px; right:60px; z-index:1000; background:var(--primary); color:#fff; font-size:12px; font-weight:700; padding:8px 12px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            <span id="mapDrawModeText"></span>
+            <button type="button" id="mapDrawModeCancelBtn" style="float:right; background:rgba(255,255,255,0.25); border:none; color:#fff; border-radius:6px; padding:2px 8px; font-size:11px; cursor:pointer;">取消</button>
+          </div>
+
+          <div id="mapSettingsPanel" style="display:none; position:absolute; top:58px; right:10px; z-index:1000; width:260px; max-height:75%; overflow-y:auto; background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:12px; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
+            <div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">🎖️ 部隊符號－兵科：</div>
+            <div id="mapUnitTypeChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+            <div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">單位規模（營以下）：</div>
+            <div id="mapUnitSizeChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+
+            <div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">🎯 武器兵棋類型：</div>
+            <div id="mapWeaponTypeChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+
+            <div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">顏色：</div>
+            <div id="mapColorPicker" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
+
+            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px;">
+              <button type="button" id="mapUndoBtn" class="btn btn-ghost" style="padding:8px; font-size:12px;"><i class="fa-solid fa-rotate-left"></i> 復原</button>
+              <button type="button" id="mapClearBtn" class="btn btn-ghost" style="padding:8px; font-size:12px;"><i class="fa-solid fa-trash"></i> 清除全部</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="tab-events" class="panel">
@@ -978,17 +976,21 @@
       let sketchTempAnnotation = null;
 
       let mapAnnotations = JSON.parse(localStorage.getItem('polung_map_annotations')) || [];
-      let mapTool = 'point';
       let mapColor = '#ef4444';
       let mapUnitType = 'infantry';
       let mapUnitSize = 'squad';
       let mapWeaponType = 'mortar60';
       let leafletMapObj = null;
       let leafletLayerRefs = [];
+      let mapInitialized = false;
+      let mapDrawMode = 'normal';
       let mapLineStart = null;
       let mapFreehandLatLngs = null;
-      let mapIsDrawing = false;
-      let mapInitialized = false;
+      let mapTempDrawLayer = null;
+      let mapLongPressTimer = null;
+      let mapLongPressTriggered = false;
+      let mapPressStartPoint = null;
+      let coordPopupCounter = 0;
 
       let leaveCollapsed = { fan: false, dao: false, taskCat: true };
 
@@ -3006,6 +3008,73 @@
         }
       }
 
+      function llToUtm(lat, lon) {
+        const a = 6378137;
+        const eccSquared = 0.00669438;
+        const k0 = 0.9996;
+        const latRad = lat * Math.PI / 180;
+        const lonRad = lon * Math.PI / 180;
+
+        let zoneNumber = Math.floor((lon + 180) / 6) + 1;
+        if (lon === 180) zoneNumber = 60;
+        if (lat >= 56 && lat < 64 && lon >= 3 && lon < 12) zoneNumber = 32;
+        if (lat >= 72 && lat < 84) {
+          if (lon >= 0 && lon < 9) zoneNumber = 31;
+          else if (lon >= 9 && lon < 21) zoneNumber = 33;
+          else if (lon >= 21 && lon < 33) zoneNumber = 35;
+          else if (lon >= 33 && lon < 42) zoneNumber = 37;
+        }
+
+        const lonOriginRad = ((zoneNumber - 1) * 6 - 180 + 3) * Math.PI / 180;
+        const eccPrimeSquared = eccSquared / (1 - eccSquared);
+        const N = a / Math.sqrt(1 - eccSquared * Math.sin(latRad) * Math.sin(latRad));
+        const T = Math.tan(latRad) * Math.tan(latRad);
+        const C = eccPrimeSquared * Math.cos(latRad) * Math.cos(latRad);
+        const A = Math.cos(latRad) * (lonRad - lonOriginRad);
+
+        const M = a * (
+          (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64 - 5 * Math.pow(eccSquared, 3) / 256) * latRad
+          - (3 * eccSquared / 8 + 3 * eccSquared * eccSquared / 32 + 45 * Math.pow(eccSquared, 3) / 1024) * Math.sin(2 * latRad)
+          + (15 * eccSquared * eccSquared / 256 + 45 * Math.pow(eccSquared, 3) / 1024) * Math.sin(4 * latRad)
+          - (35 * Math.pow(eccSquared, 3) / 3072) * Math.sin(6 * latRad)
+        );
+
+        let easting = k0 * N * (A + (1 - T + C) * Math.pow(A, 3) / 6 + (5 - 18 * T + T * T + 72 * C - 58 * eccPrimeSquared) * Math.pow(A, 5) / 120) + 500000;
+        let northing = k0 * (M + N * Math.tan(latRad) * (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * Math.pow(A, 4) / 24 + (61 - 58 * T + T * T + 600 * C - 330 * eccPrimeSquared) * Math.pow(A, 6) / 720));
+
+        let hemisphere = 'N';
+        if (lat < 0) {
+          northing += 10000000;
+          hemisphere = 'S';
+        }
+
+        return { easting: Math.round(easting), northing: Math.round(northing), zoneNumber, hemisphere };
+      }
+
+      async function fetchElevation(lat, lng) {
+        try {
+          const res = await fetch(`https://api.opentopodata.org/v1/srtm30m?locations=${lat},${lng}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.results && data.results[0] && data.results[0].elevation !== null && data.results[0].elevation !== undefined) {
+              return Math.round(data.results[0].elevation);
+            }
+          }
+        } catch (err) { /* fall through to backup source */ }
+
+        try {
+          const res2 = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`);
+          if (res2.ok) {
+            const data2 = await res2.json();
+            if (data2.results && data2.results[0] && data2.results[0].elevation !== null && data2.results[0].elevation !== undefined) {
+              return Math.round(data2.results[0].elevation);
+            }
+          }
+        } catch (err) { /* both sources failed */ }
+
+        return null;
+      }
+
       function buildSymbolIconDataUrl(drawFn, w, h, cx, cy) {
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
@@ -3041,6 +3110,23 @@
         return L.icon({ iconUrl: dataUrl, iconSize: [w, h], iconAnchor: [w / 2, 25] });
       }
 
+      function annotationLabel(ann) {
+        if (ann.type === 'point') return `標點${ann.label ? '：' + ann.label : ''}`;
+        if (ann.type === 'text') return `文字：${ann.text}`;
+        if (ann.type === 'unit') {
+          const u = sketchUnitTypes.find(x => x.key === ann.unitType);
+          const s = sketchUnitSizes.find(x => x.key === ann.unitSize);
+          return `部隊符號：${s ? s.label : ''}${u ? u.label : ''}${ann.label ? '（' + ann.label + '）' : ''}`;
+        }
+        if (ann.type === 'weapon') {
+          const w = sketchWeaponTypes.find(x => x.key === ann.weaponType);
+          return `武器兵棋：${w ? w.label : ''}${ann.label ? '（' + ann.label + '）' : ''}`;
+        }
+        if (ann.type === 'line') return '拉線';
+        if (ann.type === 'freehand') return '自由繪圖';
+        return '標記';
+      }
+
       function renderMapAnnotations() {
         if (!leafletMapObj) return;
         leafletLayerRefs.forEach(layer => leafletMapObj.removeLayer(layer));
@@ -3066,8 +3152,8 @@
         });
       }
 
-      function eraseNearestMapAnnotation(clickLatLng) {
-        if (!leafletMapObj || mapAnnotations.length === 0) return;
+      function findNearestMapAnnotation(clickLatLng) {
+        if (!leafletMapObj || mapAnnotations.length === 0) return { idx: -1, dist: Infinity };
         const clickPt = leafletMapObj.latLngToContainerPoint(clickLatLng);
         let nearestIdx = -1, nearestPixelDist = Infinity;
 
@@ -3085,11 +3171,120 @@
           if (dist < nearestPixelDist) { nearestPixelDist = dist; nearestIdx = idx; }
         });
 
-        if (nearestIdx > -1 && nearestPixelDist < 30) {
-          mapAnnotations.splice(nearestIdx, 1);
-          saveMapData();
-          renderMapAnnotations();
+        return { idx: nearestIdx, dist: nearestPixelDist };
+      }
+
+      window.deleteMapAnnotationById = function(id) {
+        mapAnnotations = mapAnnotations.filter(a => a.id !== id);
+        saveMapData();
+        renderMapAnnotations();
+        if (leafletMapObj) leafletMapObj.closePopup();
+        showToast('已刪除標記');
+      };
+
+      function showMapMarkerPopup(ann, latlng) {
+        const html = `
+          <div style="min-width:160px; font-size:13px;">
+            <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">${annotationLabel(ann)}</div>
+            <button onclick="deleteMapAnnotationById('${ann.id}')" style="width:100%; padding:6px; border-radius:8px; border:none; background:#fee2e2; color:#ef4444; font-weight:700; cursor:pointer;">🗑️ 刪除此標記</button>
+          </div>
+        `;
+        L.popup().setLatLng(latlng).setContent(html).openOn(leafletMapObj);
+      }
+
+      function showMapCoordinatePopup(latlng) {
+        const myId = ++coordPopupCounter;
+        const utm = llToUtm(latlng.lat, latlng.lng);
+        let mgrsStr = '無法計算';
+        try {
+          if (typeof mgrs !== 'undefined') mgrsStr = mgrs.forward([latlng.lng, latlng.lat], 5);
+        } catch (err) { mgrsStr = '無法計算'; }
+        const utmStr = `${utm.zoneNumber}${utm.hemisphere} E:${utm.easting} N:${utm.northing}`;
+
+        const html = `
+          <div style="font-size:13px; min-width:210px;">
+            <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">📍 點選位置座標</div>
+            <div><b>MGRS：</b>${mgrsStr}</div>
+            <div><b>UTM：</b>${utmStr}</div>
+            <div><b>標高：</b><span id="mapElevResult-${myId}">查詢中...</span></div>
+            <div style="font-size:11px; color:#888; margin-top:6px;">💡 長按此處可新增標記</div>
+          </div>
+        `;
+        L.popup().setLatLng(latlng).setContent(html).openOn(leafletMapObj);
+
+        fetchElevation(latlng.lat, latlng.lng).then(elev => {
+          const el = document.getElementById(`mapElevResult-${myId}`);
+          if (el) el.textContent = elev !== null ? `${elev} m` : '無法取得（可能離線）';
+        });
+      }
+
+      function showMapDrawModeBanner(text) {
+        document.getElementById('mapDrawModeText').textContent = text;
+        document.getElementById('mapDrawModeBanner').style.display = 'block';
+      }
+
+      function hideMapDrawModeBanner() {
+        document.getElementById('mapDrawModeBanner').style.display = 'none';
+      }
+
+      function cancelMapDrawMode() {
+        mapDrawMode = 'normal';
+        mapLineStart = null;
+        mapFreehandLatLngs = null;
+        if (mapTempDrawLayer) { leafletMapObj.removeLayer(mapTempDrawLayer); mapTempDrawLayer = null; }
+        hideMapDrawModeBanner();
+      }
+
+      window.mapMenuAction = function(type, lat, lng) {
+        if (leafletMapObj) leafletMapObj.closePopup();
+        const latlng = L.latLng(lat, lng);
+
+        if (type === 'point') {
+          const label = prompt('請輸入標點文字（可留空）：', '') || '';
+          mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'point', lat, lng, color: mapColor, label });
+          saveMapData(); renderMapAnnotations();
+        } else if (type === 'text') {
+          const text = prompt('請輸入文字內容：', '');
+          if (text) {
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'text', lat, lng, text, color: mapColor });
+            saveMapData(); renderMapAnnotations();
+          }
+        } else if (type === 'unit') {
+          const label = prompt('請輸入單位番號/名稱（可留空）：', '') || '';
+          mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'unit', lat, lng, unitType: mapUnitType, unitSize: mapUnitSize, color: mapColor, label });
+          saveMapData(); renderMapAnnotations();
+        } else if (type === 'weapon') {
+          const label = prompt('請輸入番號/位置標註（可留空）：', '') || '';
+          mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'weapon', lat, lng, weaponType: mapWeaponType, color: mapColor, label });
+          saveMapData(); renderMapAnnotations();
+        } else if (type === 'line') {
+          mapDrawMode = 'line';
+          mapLineStart = latlng;
+          showMapDrawModeBanner('拉線模式：拖曳畫出直線，放開手指完成');
+        } else if (type === 'freehand') {
+          mapDrawMode = 'freehand';
+          mapFreehandLatLngs = [latlng];
+          showMapDrawModeBanner('自由繪圖模式：拖曳繪製，放開手指完成');
         }
+      };
+
+      function showMapContextMenu(latlng) {
+        const rows = [
+          { icon: '📍', label: '新增標點', type: 'point' },
+          { icon: '🔤', label: '新增文字', type: 'text' },
+          { icon: '🎖️', label: '新增部隊符號', type: 'unit' },
+          { icon: '🎯', label: '新增武器兵棋', type: 'weapon' },
+          { icon: '📏', label: '從此處拉線', type: 'line' },
+          { icon: '✏️', label: '從此處自由繪圖', type: 'freehand' }
+        ];
+
+        const html = `
+          <div style="min-width:200px; font-size:13px;">
+            <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">📌 此處設為：</div>
+            ${rows.map(r => `<div onclick="mapMenuAction('${r.type}', ${latlng.lat}, ${latlng.lng})" style="padding:8px 4px; cursor:pointer; border-top:1px solid rgba(128,128,128,0.2);">${r.icon} ${r.label}</div>`).join('')}
+          </div>
+        `;
+        L.popup({ closeButton: true, maxWidth: 240 }).setLatLng(latlng).setContent(html).openOn(leafletMapObj);
       }
 
       function initMapIfNeeded() {
@@ -3113,69 +3308,71 @@
         mapInitialized = true;
         renderMapAnnotations();
 
-        leafletMapObj.on('click', (e) => {
-          if (mapTool === 'point') {
-            const label = prompt('請輸入標點文字（可留空）：', '') || '';
-            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'point', lat: e.latlng.lat, lng: e.latlng.lng, color: mapColor, label });
-            saveMapData(); renderMapAnnotations();
-          } else if (mapTool === 'text') {
-            const text = prompt('請輸入文字內容：', '');
-            if (text) {
-              mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'text', lat: e.latlng.lat, lng: e.latlng.lng, text, color: mapColor });
-              saveMapData(); renderMapAnnotations();
-            }
-          } else if (mapTool === 'unit') {
-            const label = prompt('請輸入單位番號/名稱（可留空）：', '') || '';
-            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'unit', lat: e.latlng.lat, lng: e.latlng.lng, unitType: mapUnitType, unitSize: mapUnitSize, color: mapColor, label });
-            saveMapData(); renderMapAnnotations();
-          } else if (mapTool === 'weapon') {
-            const label = prompt('請輸入番號/位置標註（可留空）：', '') || '';
-            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'weapon', lat: e.latlng.lat, lng: e.latlng.lng, weaponType: mapWeaponType, color: mapColor, label });
-            saveMapData(); renderMapAnnotations();
-          } else if (mapTool === 'erase') {
-            eraseNearestMapAnnotation(e.latlng);
-          }
-        });
-
         leafletMapObj.on('mousedown', (e) => {
-          if (mapTool === 'line') {
+          if (mapDrawMode === 'normal') {
+            mapLongPressTriggered = false;
+            mapPressStartPoint = e.containerPoint;
+            mapLongPressTimer = setTimeout(() => {
+              mapLongPressTriggered = true;
+              showMapContextMenu(e.latlng);
+            }, 550);
+          } else if (mapDrawMode === 'line') {
             leafletMapObj.dragging.disable();
-            mapIsDrawing = true;
-            mapLineStart = e.latlng;
-          } else if (mapTool === 'freehand') {
+          } else if (mapDrawMode === 'freehand') {
             leafletMapObj.dragging.disable();
-            mapIsDrawing = true;
             mapFreehandLatLngs = [e.latlng];
           }
         });
 
-        let mapTempLayer = null;
         leafletMapObj.on('mousemove', (e) => {
-          if (!mapIsDrawing) return;
-          if (mapTool === 'line' && mapLineStart) {
-            if (mapTempLayer) leafletMapObj.removeLayer(mapTempLayer);
-            mapTempLayer = L.polyline([mapLineStart, e.latlng], { color: mapColor, weight: 3, dashArray: '4' }).addTo(leafletMapObj);
-          } else if (mapTool === 'freehand' && mapFreehandLatLngs) {
+          if (mapLongPressTimer && mapPressStartPoint) {
+            const dist = mapPressStartPoint.distanceTo(e.containerPoint);
+            if (dist > 12) { clearTimeout(mapLongPressTimer); mapLongPressTimer = null; }
+          }
+
+          if (mapDrawMode === 'line' && mapLineStart) {
+            if (mapTempDrawLayer) leafletMapObj.removeLayer(mapTempDrawLayer);
+            mapTempDrawLayer = L.polyline([mapLineStart, e.latlng], { color: mapColor, weight: 3, dashArray: '4' }).addTo(leafletMapObj);
+          } else if (mapDrawMode === 'freehand' && mapFreehandLatLngs) {
             mapFreehandLatLngs.push(e.latlng);
-            if (mapTempLayer) leafletMapObj.removeLayer(mapTempLayer);
-            mapTempLayer = L.polyline(mapFreehandLatLngs, { color: mapColor, weight: 3 }).addTo(leafletMapObj);
+            if (mapTempDrawLayer) leafletMapObj.removeLayer(mapTempDrawLayer);
+            mapTempDrawLayer = L.polyline(mapFreehandLatLngs, { color: mapColor, weight: 3 }).addTo(leafletMapObj);
           }
         });
 
         leafletMapObj.on('mouseup', (e) => {
-          if (!mapIsDrawing) return;
-          mapIsDrawing = false;
-          leafletMapObj.dragging.enable();
-          if (mapTempLayer) { leafletMapObj.removeLayer(mapTempLayer); mapTempLayer = null; }
+          if (mapLongPressTimer) { clearTimeout(mapLongPressTimer); mapLongPressTimer = null; }
 
-          if (mapTool === 'line' && mapLineStart) {
+          if (mapDrawMode === 'line' && mapLineStart) {
+            leafletMapObj.dragging.enable();
+            if (mapTempDrawLayer) { leafletMapObj.removeLayer(mapTempDrawLayer); mapTempDrawLayer = null; }
             mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'line', latlngs: [[mapLineStart.lat, mapLineStart.lng], [e.latlng.lat, e.latlng.lng]], color: mapColor });
+            mapDrawMode = 'normal';
             mapLineStart = null;
+            hideMapDrawModeBanner();
             saveMapData(); renderMapAnnotations();
-          } else if (mapTool === 'freehand' && mapFreehandLatLngs && mapFreehandLatLngs.length > 1) {
-            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'freehand', latlngs: mapFreehandLatLngs.map(ll => [ll.lat, ll.lng]), color: mapColor });
+          } else if (mapDrawMode === 'freehand' && mapFreehandLatLngs) {
+            leafletMapObj.dragging.enable();
+            if (mapTempDrawLayer) { leafletMapObj.removeLayer(mapTempDrawLayer); mapTempDrawLayer = null; }
+            if (mapFreehandLatLngs.length > 1) {
+              mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'freehand', latlngs: mapFreehandLatLngs.map(ll => [ll.lat, ll.lng]), color: mapColor });
+              saveMapData(); renderMapAnnotations();
+            }
+            mapDrawMode = 'normal';
             mapFreehandLatLngs = null;
-            saveMapData(); renderMapAnnotations();
+            hideMapDrawModeBanner();
+          }
+        });
+
+        leafletMapObj.on('click', (e) => {
+          if (mapLongPressTriggered) { mapLongPressTriggered = false; return; }
+          if (mapDrawMode !== 'normal') return;
+
+          const nearest = findNearestMapAnnotation(e.latlng);
+          if (nearest.idx > -1 && nearest.dist < 28) {
+            showMapMarkerPopup(mapAnnotations[nearest.idx], e.latlng);
+          } else {
+            showMapCoordinatePopup(e.latlng);
           }
         });
 
@@ -3207,14 +3404,14 @@
       }
       window.setMapColor = function(c) { mapColor = c; renderMapColorPicker(); };
 
-      document.querySelectorAll('.map-tool-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          mapTool = btn.dataset.tool;
-          document.getElementById('mapUnitPicker').style.display = mapTool === 'unit' ? 'block' : 'none';
-          document.getElementById('mapWeaponPicker').style.display = mapTool === 'weapon' ? 'block' : 'none';
-        });
+      document.getElementById('mapSettingsToggleBtn').addEventListener('click', () => {
+        const panel = document.getElementById('mapSettingsPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.getElementById('mapDrawModeCancelBtn').addEventListener('click', () => {
+        if (leafletMapObj) leafletMapObj.dragging.enable();
+        cancelMapDrawMode();
       });
 
       document.getElementById('mapUndoBtn').addEventListener('click', () => {
