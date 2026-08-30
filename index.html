@@ -250,6 +250,48 @@
           <button class="btn-reset" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> 重置歸零</button>
         </h2>
         <div id="dayTaskList" class="task-list"></div>
+
+        <h2 style="margin-top:20px;">任務日誌檢視</h2>
+        <div class="form-group">
+          <div style="display:flex; gap:8px;">
+            <div class="input-field" style="flex:1;"><label>開始日期</label><input id="logStart" type="date" /></div>
+            <div class="input-field" style="flex:1;"><label>結束日期</label><input id="logEnd" type="date" /></div>
+          </div>
+        </div>
+
+        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
+          <div style="display:flex; gap:16px;">
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="selectAllLogBtn" checked onchange="toggleAllLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
+            </label>
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="deselectAllLogBtn" onchange="toggleAllLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
+            </label>
+          </div>
+        </div>
+
+        <div id="logTaskList" class="task-list"></div>
+
+        <h2 style="margin-top:20px;">大紀事紀錄</h2>
+        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
+          <div style="display:flex; gap:16px;">
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="selectAllEventLogBtn" checked onchange="toggleAllEventLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
+            </label>
+            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <input type="checkbox" id="deselectAllEventLogBtn" onchange="toggleAllEventLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
+            </label>
+          </div>
+        </div>
+        <div id="logEventList" class="task-list"></div>
+
+        <h2 style="margin-top:20px;">日誌輸出與呈核</h2>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
+          <button class="btn btn-ghost" onclick="exportPrintPDF()"><i class="fa-solid fa-file-pdf"></i> 高解析 PDF / 列印</button>
+          <button class="btn btn-ghost" onclick="exportTextSummary()"><i class="fa-solid fa-file-lines"></i> 複製文字摘要 (LINE群)</button>
+        </div>
       </section>
 
       <!-- Panel 2: 成員管理 -->
@@ -615,7 +657,7 @@
       <!-- Panel 7: 季度明細 -->
       <section id="tab-quarterly" class="panel">
         <h2>成員季度休假額度統計 (依部門排序)</h2>
-        <p class="hint">排序規則：排部 ➔ 一砲 ➔ 二砲 ➔ 三砲 ➔ 步排 ➔ PT</p>
+        <p class="hint">排序規則：排部 ➔ 一砲 ➔ 二砲 ➔ 三砲 ➔ 步排 ➔ PT。統計範圍為當年度 (1/1~12/31)，跨年假期會依實際日期分開計入各年度，此處僅顯示今年度總和。</p>
         <div class="form-group">
           <table class="gantt-table" style="width:100%; min-width:auto;">
             <thead>
@@ -741,51 +783,6 @@
         <div id="eventCatFilterChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
         <div id="eventList" class="task-list"></div>
       </section>
-
-      <!-- Panel 8: 日誌 -->
-      <section id="tab-log" class="panel">
-        <h2>任務日誌檢視</h2>
-        <div class="form-group">
-          <div style="display:flex; gap:8px;">
-            <div class="input-field" style="flex:1;"><label>開始日期</label><input id="logStart" type="date" /></div>
-            <div class="input-field" style="flex:1;"><label>結束日期</label><input id="logEnd" type="date" /></div>
-          </div>
-        </div>
-
-        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
-          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
-          <div style="display:flex; gap:16px;">
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="selectAllLogBtn" checked onchange="toggleAllLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
-            </label>
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="deselectAllLogBtn" onchange="toggleAllLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
-            </label>
-          </div>
-        </div>
-
-        <div id="logTaskList" class="task-list"></div>
-
-        <h2 style="margin-top:20px;">大紀事紀錄</h2>
-        <div class="log-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--card-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
-          <span style="font-size:12px; font-weight:700;">匯出選取控制：</span>
-          <div style="display:flex; gap:16px;">
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="selectAllEventLogBtn" checked onchange="toggleAllEventLogSelection(this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全選
-            </label>
-            <label style="font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
-              <input type="checkbox" id="deselectAllEventLogBtn" onchange="toggleAllEventLogSelection(!this.checked)" style="width:16px; height:16px; accent-color:var(--primary);" /> 全取消
-            </label>
-          </div>
-        </div>
-        <div id="logEventList" class="task-list"></div>
-
-        <h2 style="margin-top:20px;">日誌輸出與呈核</h2>
-        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
-          <button class="btn btn-ghost" onclick="exportPrintPDF()"><i class="fa-solid fa-file-pdf"></i> 高解析 PDF / 列印</button>
-          <button class="btn btn-ghost" onclick="exportTextSummary()"><i class="fa-solid fa-file-lines"></i> 複製文字摘要 (LINE群)</button>
-        </div>
-      </section>
     </main>
 
     <!-- 底欄 Navigation (新增 Warno 預令) -->
@@ -801,7 +798,6 @@
       <button class="nav-item" data-tab="sketch"><i class="fa-solid fa-map-location-dot"></i><span>標圖</span></button>
       <button class="nav-item" data-tab="map"><i class="fa-solid fa-earth-asia"></i><span>地圖</span></button>
       <button class="nav-item" data-tab="events"><i class="fa-solid fa-clipboard-list"></i><span>大紀事</span></button>
-      <button class="nav-item" data-tab="log"><i class="fa-solid fa-book"></i><span>日誌</span></button>
     </nav>
   </div>
 
@@ -3308,50 +3304,69 @@
         mapInitialized = true;
         renderMapAnnotations();
 
-        leafletMapObj.on('mousedown', (e) => {
+        const mapContainerEl = leafletMapObj.getContainer();
+        let mapPointerDownTime = 0;
+
+        mapContainerEl.addEventListener('pointerdown', (e) => {
+          const latlng = leafletMapObj.mouseEventToLatLng(e);
+          const containerPoint = leafletMapObj.mouseEventToContainerPoint(e);
+          mapPointerDownTime = Date.now();
+
           if (mapDrawMode === 'normal') {
             mapLongPressTriggered = false;
-            mapPressStartPoint = e.containerPoint;
+            mapPressStartPoint = containerPoint;
             mapLongPressTimer = setTimeout(() => {
               mapLongPressTriggered = true;
-              showMapContextMenu(e.latlng);
+              showMapContextMenu(latlng);
             }, 550);
           } else if (mapDrawMode === 'line') {
             leafletMapObj.dragging.disable();
           } else if (mapDrawMode === 'freehand') {
             leafletMapObj.dragging.disable();
-            mapFreehandLatLngs = [e.latlng];
+            mapFreehandLatLngs = [latlng];
           }
         });
 
-        leafletMapObj.on('mousemove', (e) => {
+        mapContainerEl.addEventListener('pointermove', (e) => {
+          const containerPoint = leafletMapObj.mouseEventToContainerPoint(e);
+
           if (mapLongPressTimer && mapPressStartPoint) {
-            const dist = mapPressStartPoint.distanceTo(e.containerPoint);
+            const dist = mapPressStartPoint.distanceTo(containerPoint);
             if (dist > 12) { clearTimeout(mapLongPressTimer); mapLongPressTimer = null; }
           }
 
           if (mapDrawMode === 'line' && mapLineStart) {
+            const latlng = leafletMapObj.mouseEventToLatLng(e);
             if (mapTempDrawLayer) leafletMapObj.removeLayer(mapTempDrawLayer);
-            mapTempDrawLayer = L.polyline([mapLineStart, e.latlng], { color: mapColor, weight: 3, dashArray: '4' }).addTo(leafletMapObj);
+            mapTempDrawLayer = L.polyline([mapLineStart, latlng], { color: mapColor, weight: 3, dashArray: '4' }).addTo(leafletMapObj);
           } else if (mapDrawMode === 'freehand' && mapFreehandLatLngs) {
-            mapFreehandLatLngs.push(e.latlng);
+            const latlng = leafletMapObj.mouseEventToLatLng(e);
+            mapFreehandLatLngs.push(latlng);
             if (mapTempDrawLayer) leafletMapObj.removeLayer(mapTempDrawLayer);
             mapTempDrawLayer = L.polyline(mapFreehandLatLngs, { color: mapColor, weight: 3 }).addTo(leafletMapObj);
           }
         });
 
-        leafletMapObj.on('mouseup', (e) => {
+        mapContainerEl.addEventListener('pointerup', (e) => {
+          const latlng = leafletMapObj.mouseEventToLatLng(e);
+          const containerPoint = leafletMapObj.mouseEventToContainerPoint(e);
+          const elapsed = Date.now() - mapPointerDownTime;
+          const wasLongPress = mapLongPressTriggered;
+
           if (mapLongPressTimer) { clearTimeout(mapLongPressTimer); mapLongPressTimer = null; }
 
           if (mapDrawMode === 'line' && mapLineStart) {
             leafletMapObj.dragging.enable();
             if (mapTempDrawLayer) { leafletMapObj.removeLayer(mapTempDrawLayer); mapTempDrawLayer = null; }
-            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'line', latlngs: [[mapLineStart.lat, mapLineStart.lng], [e.latlng.lat, e.latlng.lng]], color: mapColor });
+            mapAnnotations.push({ id: 'mp_' + Date.now(), type: 'line', latlngs: [[mapLineStart.lat, mapLineStart.lng], [latlng.lat, latlng.lng]], color: mapColor });
             mapDrawMode = 'normal';
             mapLineStart = null;
             hideMapDrawModeBanner();
             saveMapData(); renderMapAnnotations();
-          } else if (mapDrawMode === 'freehand' && mapFreehandLatLngs) {
+            return;
+          }
+
+          if (mapDrawMode === 'freehand' && mapFreehandLatLngs) {
             leafletMapObj.dragging.enable();
             if (mapTempDrawLayer) { leafletMapObj.removeLayer(mapTempDrawLayer); mapTempDrawLayer = null; }
             if (mapFreehandLatLngs.length > 1) {
@@ -3361,18 +3376,27 @@
             mapDrawMode = 'normal';
             mapFreehandLatLngs = null;
             hideMapDrawModeBanner();
+            return;
+          }
+
+          if (wasLongPress) { mapLongPressTriggered = false; return; }
+
+          const distFromStart = mapPressStartPoint ? mapPressStartPoint.distanceTo(containerPoint) : 0;
+          if (elapsed < 500 && distFromStart < 12) {
+            const nearest = findNearestMapAnnotation(latlng);
+            if (nearest.idx > -1 && nearest.dist < 28) {
+              showMapMarkerPopup(mapAnnotations[nearest.idx], latlng);
+            } else {
+              showMapCoordinatePopup(latlng);
+            }
           }
         });
 
-        leafletMapObj.on('click', (e) => {
-          if (mapLongPressTriggered) { mapLongPressTriggered = false; return; }
-          if (mapDrawMode !== 'normal') return;
-
-          const nearest = findNearestMapAnnotation(e.latlng);
-          if (nearest.idx > -1 && nearest.dist < 28) {
-            showMapMarkerPopup(mapAnnotations[nearest.idx], e.latlng);
-          } else {
-            showMapCoordinatePopup(e.latlng);
+        mapContainerEl.addEventListener('pointercancel', () => {
+          if (mapLongPressTimer) { clearTimeout(mapLongPressTimer); mapLongPressTimer = null; }
+          if (mapDrawMode !== 'normal') {
+            leafletMapObj.dragging.enable();
+            cancelMapDrawMode();
           }
         });
 
@@ -3713,6 +3737,10 @@
         renderMemberBatchChips();
       };
 
+      function hasOverlappingLeave(memberName, start, end, excludeId) {
+        return leaveRecords.some(r => r.memberName === memberName && r.id !== excludeId && start <= r.end && r.start <= end);
+      }
+
       document.getElementById('addFanBtn').addEventListener('click', () => {
         const type = document.getElementById('fanTypeSelect').value;
         const start = document.getElementById('fanStart').value;
@@ -3721,13 +3749,26 @@
         if (!start || !end) return showToast('請選擇開始與結束日期！');
         if (selectedFanMembers.length === 0) return showToast('請至少點選一位人員！');
 
+        let addedCount = 0;
+        const skippedNames = [];
+
         selectedFanMembers.forEach(memberName => {
+          if (hasOverlappingLeave(memberName, start, end)) {
+            skippedNames.push(memberName);
+            return;
+          }
           leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start, end });
+          addedCount++;
         });
 
         selectedFanMembers = [];
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
-        showToast('批次新增成功！');
+
+        if (skippedNames.length > 0) {
+          showToast(`已新增 ${addedCount} 人；${skippedNames.join('、')} 該期間已有其他假別紀錄，略過`);
+        } else {
+          showToast('批次新增成功！');
+        }
       });
 
       window.toggleFanImportCollapse = function() {
@@ -3771,6 +3812,8 @@
           const memberExists = members.some(m => m.name === parsed.name);
           if (!memberExists) { skippedCount++; return; }
 
+          if (hasOverlappingLeave(parsed.name, parsed.start, parsed.end)) { skippedCount++; return; }
+
           leaveRecords.push({
             id: 'lv_' + Date.now() + '_' + Math.floor(Math.random() * 100000),
             memberName: parsed.name,
@@ -3793,13 +3836,26 @@
         if (!singleDate) return showToast('請選擇事故日期！');
         if (selectedDaoMembers.length === 0) return showToast('請至少點選一位成員！');
 
+        let addedCount = 0;
+        const skippedNames = [];
+
         selectedDaoMembers.forEach(memberName => {
+          if (hasOverlappingLeave(memberName, singleDate, singleDate)) {
+            skippedNames.push(memberName);
+            return;
+          }
           leaveRecords.push({ id: 'lv_' + Date.now() + '_' + Math.floor(Math.random()*1000), memberName, type, start: singleDate, end: singleDate });
+          addedCount++;
         });
 
         selectedDaoMembers = [];
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView(); renderMemberBatchChips();
-        showToast('批次新增事故成功！');
+
+        if (skippedNames.length > 0) {
+          showToast(`已新增 ${addedCount} 人；${skippedNames.join('、')} 該日已有其他假別紀錄，略過`);
+        } else {
+          showToast('批次新增事故成功！');
+        }
       });
 
       window.toggleLeaveSection = function(type) {
@@ -3883,16 +3939,24 @@
           const newEnd = prompt(`編輯【${rec.memberName}】結束日期 (YYYY-MM-DD)：`, rec.end);
           if (newEnd === null) return;
 
-          if (newStart.trim()) rec.start = newStart.trim();
-          if (newEnd.trim()) rec.end = newEnd.trim();
+          const finalStart = newStart.trim() || rec.start;
+          const finalEnd = newEnd.trim() || rec.end;
+
+          if (hasOverlappingLeave(rec.memberName, finalStart, finalEnd, rec.id)) {
+            return showToast('該期間已有其他假別紀錄，無法更新！');
+          }
+          rec.start = finalStart;
+          rec.end = finalEnd;
         } else {
           const newDate = prompt(`編輯【${rec.memberName}】事故日期 (YYYY-MM-DD)：`, rec.start);
           if (newDate === null) return;
 
-          if (newDate.trim()) {
-            rec.start = newDate.trim();
-            rec.end = newDate.trim();
+          const finalDate = newDate.trim() || rec.start;
+          if (hasOverlappingLeave(rec.memberName, finalDate, finalDate, rec.id)) {
+            return showToast('該日期已有其他假別紀錄，無法更新！');
           }
+          rec.start = finalDate;
+          rec.end = finalDate;
         }
 
         saveData(); renderGantt(); renderLeaveList(); renderQuarterlyView();
@@ -4095,6 +4159,17 @@
         return `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
       }
 
+      function daysInYear(startStr, endStr, year) {
+        const yearStart = `${year}-01-01`;
+        const yearEnd = `${year}-12-31`;
+        const clippedStart = startStr > yearStart ? startStr : yearStart;
+        const clippedEnd = endStr < yearEnd ? endStr : yearEnd;
+        if (clippedStart > clippedEnd) return 0;
+        const dStart = new Date(clippedStart);
+        const dEnd = new Date(clippedEnd);
+        return Math.round((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+      }
+
       function renderQuarterlyView() {
         const tbody = document.getElementById('leaveQuotaBody');
         tbody.innerHTML = '';
@@ -4104,6 +4179,7 @@
           return;
         }
 
+        const currentYear = new Date().getFullYear();
         const sortedMembers = getSortedMembers();
 
         sortedMembers.forEach(m => {
@@ -4114,17 +4190,17 @@
             .filter(r => r.memberName === m.name && (r.type === '返' || r.type === '訓'))
             .sort((a, b) => a.start.localeCompare(b.start))
             .forEach(r => {
-              const dStart = new Date(r.start);
-              const dEnd = new Date(r.end);
-              const diffDays = Math.ceil(Math.abs(dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
-              fanDaysTotal += diffDays;
-              fanRanges.push(`[${r.type}] ${formatDateShort(r.start)} ~ ${formatDateShort(r.end)}`);
+              const daysThisYear = daysInYear(r.start, r.end, currentYear);
+              if (daysThisYear > 0) {
+                fanDaysTotal += daysThisYear;
+                fanRanges.push(`[${r.type}] ${formatDateShort(r.start)} ~ ${formatDateShort(r.end)}`);
+              }
             });
 
           const fanDetailsStr = fanRanges.length > 0 ? `${fanDaysTotal} 天 (${fanRanges.join(' / ')})` : '0 天';
 
           const daoRecords = leaveRecords
-            .filter(r => r.memberName === m.name && ['島', '公', '檢', '測'].includes(r.type))
+            .filter(r => r.memberName === m.name && ['島', '公', '檢', '測'].includes(r.type) && r.start.slice(0, 4) === String(currentYear))
             .sort((a, b) => a.start.localeCompare(b.start));
 
           const daoDaysTotal = daoRecords.length;
@@ -4422,3 +4498,4 @@
   </script>
 </body>
 </html>
+
